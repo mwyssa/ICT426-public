@@ -11,3 +11,9 @@ Contient:
 - Des données fictives
 
 Permet dans un premier temps d'avoir des données en local chacun sur son client pour le développement et les tests. Dans un deuxième temps, devra être migrée selon les consignes (à voir selon la difficulté et le temps à disposition).
+## Technologies utilisées
+### Frontend
+### Backend
+- Node.js
+### Database
+- SQL
