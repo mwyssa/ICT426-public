@@ -1,0 +1,1 @@
+export default function EnvelopesPage(){return <h1>Envelopes</h1>}
