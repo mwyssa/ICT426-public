@@ -64,13 +64,14 @@ npm approve-scripts bcrypt@6.0.0
 ## Démarrer le serveur de développement
 
 ```bash
-
+npm run dev:server
 ```
 
 Vous devriez voir un message similaire :
 
 ```text
-
+Connexion MySQL réussie.
+API disponible sur http://localhost:3000
 ```
 
 Ouvrez l'adresse indiquée dans votre navigateur.

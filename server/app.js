@@ -63,16 +63,6 @@ app.use(express.json());
 // POST /api/auth/login
 app.use("/api/auth", authRoutes);
 
-
-// ---------------------------------------------------------
-// Routes protégées
-// ---------------------------------------------------------
-
-// Routes utilisées actuellement pour tester
-// le fonctionnement de l'authentification JWT.
-app.use("/api/protected", protectedRoutes);
-
-
 // ---------------------------------------------------------
 // Route inexistante
 // ---------------------------------------------------------
