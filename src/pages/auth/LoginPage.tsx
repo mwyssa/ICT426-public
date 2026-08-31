@@ -10,13 +10,17 @@ export default function LoginPage() {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
 
-    const handleLogin = (e: React.FormEvent) => {
+    const [apiError, setApiError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         let isValid = true;
 
         setEmailError("");
         setPasswordError("");
+        setApiError("");
 
         if (!email.trim()) {
             setEmailError("Veuillez saisir votre adresse e-mail.");
@@ -37,8 +41,41 @@ export default function LoginPage() {
             return;
         }
 
-        // TODO : appel API plus tard
-        navigate("/dashboard");
+        try {
+            setIsLoading(true);
+
+            // ==========================
+            // Simulation du backend
+            // ==========================
+            await new Promise((resolve) =>
+                setTimeout(resolve, 1000)
+            );
+
+            // Cas de succès simulé
+            if (
+                email === "test@test.ch" &&
+                password === "1234"
+            ) {
+                localStorage.setItem(
+                    "isAuthenticated",
+                    "true"
+                );
+
+                navigate("/dashboard");
+                return;
+            }
+
+            // Cas d'erreur simulé
+            setApiError(
+                "Adresse e-mail ou mot de passe incorrect."
+            );
+        } catch {
+            setApiError(
+                "Impossible de contacter le serveur."
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -96,11 +133,20 @@ export default function LoginPage() {
                         )}
                     </div>
 
+                    {apiError && (
+                        <div className="alert alert-danger">
+                            {apiError}
+                        </div>
+                    )}
+
                     <button
                         type="submit"
                         className="btn btn-primary w-100"
+                        disabled={isLoading}
                     >
-                        Se connecter
+                        {isLoading
+                            ? "Connexion..."
+                            : "Se connecter"}
                     </button>
                 </form>
 
