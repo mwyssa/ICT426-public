@@ -6,3 +6,40 @@
   - feature frontend 1
   - feature backend 1
 - *Branche personnelle* : Pour le travail individuel de chacun
+
+
+# Lancer le frontend
+
+Une fois le projet récupéré sur votre poste, ouvrez un terminal dans le dossier racine du frontend (celui qui contient `package.json`).
+
+## Installer les dépendances
+
+À exécuter une seule fois :
+
+```bash
+npm install
+```
+
+## Démarrer le serveur de développement
+
+```bash
+npm run dev
+```
+
+Vous devriez voir un message similaire :
+
+```text
+VITE vX.X.X ready in XXX ms
+
+➜ Local: http://localhost:5173/
+```
+
+Ouvrez l'adresse indiquée dans votre navigateur.
+
+## Arrêter le serveur
+
+Dans le terminal :
+
+```text
+Ctrl + C
+```
