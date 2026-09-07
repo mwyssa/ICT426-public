@@ -1,0 +1,157 @@
+// bcrypt permet de comparer le mot de passe reçu
+// avec le hash bcrypt enregistré dans MySQL.
+import bcrypt from "bcrypt";
+
+// jsonwebtoken permet de créer un token JWT
+// après une authentification réussie.
+import jwt from "jsonwebtoken";
+
+// Fonction permettant de rechercher un utilisateur dans MySQL.
+import { findUserByEmail } from "../models/user_model.js";
+
+// Fonction permettant de valider email + mot de passe.
+import { validateLogin } from "../validators/auth_validator.js";
+
+
+/**
+ * Gère la connexion d'un utilisateur.
+ *
+ * Endpoint :
+ * POST /api/auth/login
+ */
+export async function login(req, res, next) {
+
+    try {
+
+        // ---------------------------------------------------------
+        // 1. Validation des données reçues
+        // ---------------------------------------------------------
+
+        // req.body contient les données JSON envoyées par le frontend.
+        //
+        // Exemple :
+        // {
+        //     "email": "test@test.ch",
+        //     "password": "123456"
+        // }
+        const validation = validateLogin(req.body);
+
+        // Si les données sont invalides,
+        // on arrête immédiatement la connexion.
+        if (!validation.valid) {
+            return res.status(400).json({
+                error: "VALIDATION_ERROR",
+                message: "Les données envoyées sont invalides.",
+                details: validation.errors
+            });
+        }
+
+        // Récupération des données déjà vérifiées par le validator.
+        const { email, password } = validation;
+
+
+        // ---------------------------------------------------------
+        // 2. Recherche de l'utilisateur
+        // ---------------------------------------------------------
+
+        // Recherche l'utilisateur correspondant à l'adresse email.
+        const user = await findUserByEmail(email);
+
+        // Si aucun utilisateur n'a été trouvé,
+        // on refuse la connexion.
+        if (!user) {
+            return res.status(401).json({
+                error: "INVALID_CREDENTIALS",
+                message: "Email ou mot de passe incorrect."
+            });
+        }
+
+
+        // ---------------------------------------------------------
+        // 3. Vérification du mot de passe
+        // ---------------------------------------------------------
+
+        // bcrypt.compare() compare :
+        //
+        // - le mot de passe en clair reçu du frontend
+        // - le hash enregistré dans la base de données
+        //
+        // bcrypt retourne true si le mot de passe correspond.
+        const passwordValid = await bcrypt.compare(
+            password,
+            user.hash
+        );
+
+        // Si le mot de passe ne correspond pas au hash,
+        // on refuse la connexion.
+        if (!passwordValid) {
+            return res.status(401).json({
+                error: "INVALID_CREDENTIALS",
+                message: "Email ou mot de passe incorrect."
+            });
+        }
+
+
+        // ---------------------------------------------------------
+        // 4. Création du token JWT
+        // ---------------------------------------------------------
+
+        // Le token contient uniquement les informations
+        // nécessaires pour identifier l'utilisateur.
+        //
+        // On ne met jamais le mot de passe ou son hash dans le JWT.
+        const token = jwt.sign(
+            {
+                // "sub" correspond au sujet du token.
+                // On l'utilise ici pour enregistrer l'id utilisateur.
+                sub: String(user.id),
+
+                // Le rôle pourra être utilisé plus tard
+                // pour différencier un utilisateur d'un administrateur.
+                role: user.role
+            },
+
+            // Clé secrète utilisée pour signer le token.
+            process.env.JWT_SECRET,
+
+            {
+                // Durée de validité du token.
+                expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+
+                // Algorithme utilisé pour signer le JWT.
+                algorithm: "HS256"
+            }
+        );
+
+
+        // ---------------------------------------------------------
+        // 5. Connexion réussie
+        // ---------------------------------------------------------
+
+        // Retour du token ainsi que des informations utiles
+        // de l'utilisateur au frontend.
+        //
+        // Le hash bcrypt n'est jamais retourné.
+        return res.status(200).json({
+            message: "Connexion réussie.",
+
+            token,
+            tokenType: "Bearer",
+            expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+
+            user: {
+                id: user.id,
+                name: user.name,
+                mail: user.mail,
+                role: user.role,
+                family_id: user.family_id
+            }
+        });
+
+    } catch (error) {
+
+        // En cas d'erreur imprévue (MySQL, JWT, etc.),
+        // on transmet l'erreur au middleware errorHandler.
+        next(error);
+    }
+}

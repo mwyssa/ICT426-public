@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import ProtectedRoute from "./ProtectedRoute";
 import DashboardPage from "../pages/DashboardPage";
 import AccountsPage from "../pages/AccountsPage";
 import TransactionsPage from "../pages/TransactionsPage";
@@ -22,13 +22,71 @@ export default function AppRouter() {
             <Route path="/register" element={<RegisterPage />} />
 
             {/* Application */}
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/accounts" element={<AccountsPage />} />
-            <Route path="/transactions" element={<TransactionsPage />} />
-            <Route path="/envelopes" element={<EnvelopesPage />} />
-            <Route path="/budget-stats" element={<BudgetStatsPage />} />
-            <Route path="/family" element={<FamilyPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            {/* Pages protégées */}
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/accounts"
+                element={
+                    <ProtectedRoute>
+                        <AccountsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/transactions"
+                element={
+                    <ProtectedRoute>
+                        <TransactionsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/envelopes"
+                element={
+                    <ProtectedRoute>
+                        <EnvelopesPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/budget-stats"
+                element={
+                    <ProtectedRoute>
+                        <BudgetStatsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/family"
+                element={
+                    <ProtectedRoute>
+                        <FamilyPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedRoute>
+                        <SettingsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route path="*" element={<NotFoundPage />} />
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />

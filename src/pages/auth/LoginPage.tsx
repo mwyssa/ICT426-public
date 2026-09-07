@@ -1,13 +1,88 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../services/authService";
 
 export default function LoginPage() {
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
+    const [apiError, setApiError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // TODO : remplacer par un vrai appel API plus tard
-        navigate("/dashboard");
+        let isValid = true;
+
+        setEmailError("");
+        setPasswordError("");
+        setApiError("");
+
+        // Validation email
+        if (!email.trim()) {
+            setEmailError("Veuillez saisir votre adresse e-mail.");
+            isValid = false;
+        } else if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ) {
+            setEmailError("Format d'e-mail invalide.");
+            isValid = false;
+        }
+
+        // Validation mot de passe
+        if (!password.trim()) {
+            setPasswordError("Veuillez saisir votre mot de passe.");
+            isValid = false;
+        }
+
+        if (!isValid) {
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+
+            const result = await login(
+                email,
+                password
+            );
+
+            // Sauvegarde du token JWT
+            localStorage.setItem(
+                "token",
+                result.token
+            );
+
+            // Indicateur temporaire de connexion
+            localStorage.setItem(
+                "isAuthenticated",
+                "true"
+            );
+
+            // Sauvegarde des infos utilisateur
+            localStorage.setItem(
+                "user",
+                JSON.stringify(result.user)
+            );
+
+            navigate("/dashboard");
+
+        } catch (error) {
+
+            setApiError(
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de se connecter."
+            );
+
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -29,8 +104,18 @@ export default function LoginPage() {
                         <input
                             type="email"
                             className="form-control"
-                            placeholder="email@exemple.ch"
+                            placeholder="email@example.ch"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
                         />
+
+                        {emailError && (
+                            <div className="text-danger mt-1">
+                                {emailError}
+                            </div>
+                        )}
                     </div>
 
                     <div className="mb-4">
@@ -42,14 +127,33 @@ export default function LoginPage() {
                             type="password"
                             className="form-control"
                             placeholder="********"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
                         />
+
+                        {passwordError && (
+                            <div className="text-danger mt-1">
+                                {passwordError}
+                            </div>
+                        )}
                     </div>
+
+                    {apiError && (
+                        <div className="alert alert-danger">
+                            {apiError}
+                        </div>
+                    )}
 
                     <button
                         type="submit"
                         className="btn btn-primary w-100"
+                        disabled={isLoading}
                     >
-                        Se connecter
+                        {isLoading
+                            ? "Connexion..."
+                            : "Se connecter"}
                     </button>
                 </form>
 
