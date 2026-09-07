@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../services/authService";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function LoginPage() {
         setPasswordError("");
         setApiError("");
 
+        // Validation email
         if (!email.trim()) {
             setEmailError("Veuillez saisir votre adresse e-mail.");
             isValid = false;
@@ -32,6 +34,7 @@ export default function LoginPage() {
             isValid = false;
         }
 
+        // Validation mot de passe
         if (!password.trim()) {
             setPasswordError("Veuillez saisir votre mot de passe.");
             isValid = false;
@@ -44,35 +47,39 @@ export default function LoginPage() {
         try {
             setIsLoading(true);
 
-            // ==========================
-            // Simulation du backend
-            // ==========================
-            await new Promise((resolve) =>
-                setTimeout(resolve, 1000)
+            const result = await login(
+                email,
+                password
             );
 
-            // Cas de succès simulé
-            if (
-                email === "test@test.ch" &&
-                password === "1234"
-            ) {
-                localStorage.setItem(
-                    "isAuthenticated",
-                    "true"
-                );
+            // Sauvegarde du token JWT
+            localStorage.setItem(
+                "token",
+                result.token
+            );
 
-                navigate("/dashboard");
-                return;
-            }
+            // Indicateur temporaire de connexion
+            localStorage.setItem(
+                "isAuthenticated",
+                "true"
+            );
 
-            // Cas d'erreur simulé
+            // Sauvegarde des infos utilisateur
+            localStorage.setItem(
+                "user",
+                JSON.stringify(result.user)
+            );
+
+            navigate("/dashboard");
+
+        } catch (error) {
+
             setApiError(
-                "Adresse e-mail ou mot de passe incorrect."
+                error instanceof Error
+                    ? error.message
+                    : "Impossible de se connecter."
             );
-        } catch {
-            setApiError(
-                "Impossible de contacter le serveur."
-            );
+
         } finally {
             setIsLoading(false);
         }
