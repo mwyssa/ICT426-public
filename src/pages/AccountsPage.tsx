@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";              // états + effet au c
 import AppLayout from "../layouts/AppLayout";              // cadre commun (sidebar)
 import { getAccounts } from "../services/accountService";  // récupération des données
 import type { Account } from "../types/account";           // type d'un compte
+import moneyIcon from "../img/money.png";               // icône affichée devant chaque compte
 
 
 // Le solde est stocké en centimes (INT). On le transforme en montant lisible.
@@ -130,7 +131,12 @@ export default function AccountsPage() {
                                     className="d-flex justify-content-between align-items-center border-top pt-3 mt-3"
                                 >
                                     <div className="d-flex align-items-center">
-                                        <div className="fs-2 me-3">🏦</div>
+                                        <img
+                                            src={moneyIcon}
+                                            alt=""
+                                            className="me-3"
+                                            style={{ width: "32px", height: "32px" }}
+                                        />
                                         <div>
                                             <h5 className="mb-0">{account.name}</h5>
                                         </div>

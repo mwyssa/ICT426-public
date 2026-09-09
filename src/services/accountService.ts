@@ -11,11 +11,18 @@ export async function getAccounts(): Promise<Account[]> {
     // Petit délai artificiel pour voir l'état de chargement à l'écran :
     await new Promise((resolve) => setTimeout(resolve, 800));
 
+    // test de message d'erreur
+    //throw new Error("test");
+
+    // a tout mettre en commentaire si veut test le message "vous n'avez pas de compte.."
     return [
-        { id: 1, name: "Compte courant", balance: 218050, type: "courant" },
-        { id: 2, name: "Compte épargne", balance: 564000, type: "epargne" },
-        { id: 3, name: "Compte commun",  balance: 132075, type: "courant" },
+       { id: 1, name: "Compte courant", balance: 218050, type: "courant" },
+       { id: 2, name: "Compte épargne", balance: 564000, type: "epargne" },
+       { id: 3, name: "Compte commun",  balance: 132075, type: "courant" },
     ];
+
+    // test pour avoir le message "vous n'avez pas de comptes..."
+    //return [];
 
     // --- Version BACKEND (à activer quand l'API existera) ---
     // const res = await fetch("http://localhost:8080/api/accounts");
