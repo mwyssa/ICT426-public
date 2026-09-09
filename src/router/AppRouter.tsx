@@ -10,6 +10,7 @@ import SettingsPage from "../pages/SettingsPage";
 
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import HomeRedirect from "./HomeRedirect";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -17,7 +18,7 @@ export default function AppRouter() {
     return (
         <Routes>
             {/* Authentification */}
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
