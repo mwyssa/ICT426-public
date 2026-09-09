@@ -7,6 +7,7 @@ import cors from "cors";
 
 // Import des routes.
 import authRoutes from "./routes/auth_routes.js";
+import accountRoutes from "./routes/account_routes.js";
 
 
 // Middleware global de gestion des erreurs.
@@ -62,7 +63,7 @@ app.use(express.json());
 //
 // POST /api/auth/login
 app.use("/api/auth", authRoutes);
-
+app.use("/accounts", accountRoutes);
 // ---------------------------------------------------------
 // Route inexistante
 // ---------------------------------------------------------
