@@ -1,18 +1,14 @@
-// ============================================================================
 //  AccountsPage — Consulter mes comptes bancaires (US-12-FE)
 //  Affiche la liste des comptes de l'utilisateur connecté, REGROUPÉS PAR TYPE
 //  (courant, epargne, ...). Gère les états : chargement, erreur, liste vide.
 //  Le bouton "Ajouter un compte" est en place : il sera branché sur le
 //  formulaire d'ajout (US-08) par la suite.
-// ============================================================================
 
-// ----- IMPORTS --------------------------------------------------------------
 import { useEffect, useState } from "react";              // états + effet au chargement
 import AppLayout from "../layouts/AppLayout";              // cadre commun (sidebar)
 import { getAccounts } from "../services/accountService";  // récupération des données
 import type { Account } from "../types/account";           // type d'un compte
 
-// ----- FONCTIONS UTILITAIRES ------------------------------------------------
 
 // Le solde est stocké en centimes (INT). On le transforme en montant lisible.
 // Ex: 218050 -> "2 180.50 CHF"
@@ -50,16 +46,11 @@ function categoryLabel(type: string): string {
 
 export default function AccountsPage() {
 
-    // ========================================================================
-    //  ZONE LOGIQUE (le "cerveau")
-    // ========================================================================
-
-    // ----- ÉTATS ------------------------------------------------------------
     const [accounts, setAccounts] = useState<Account[]>([]); // la liste des comptes
     const [loading, setLoading] = useState(true);            // true = chargement en cours
     const [error, setError] = useState(false);               // true = la récupération a échoué
 
-    // ----- CHARGEMENT AU MONTAGE DE LA PAGE ---------------------------------
+
     // useEffect avec [] = s'exécute une seule fois, au premier affichage.
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -81,9 +72,6 @@ export default function AccountsPage() {
     // On regroupe les comptes par type juste avant l'affichage.
     const groupedAccounts = groupByType(accounts);
 
-    // ========================================================================
-    //  ZONE AFFICHAGE (le "visage")
-    // ========================================================================
     return (
         <AppLayout>
             {/* ----- EN-TÊTE : titre + bouton "Ajouter un compte" ----- */}
