@@ -10,29 +10,57 @@ import {
     authenticateToken
 } from "../middleware/auth_middleware.js";
 
+// Fonction permettant de récupérer les comptes d'un utilisateur.
+import {
+    getAccountByUserId
+} from "../models/account_model.js";
 
 const router = express.Router();
-
 
 // ---------------------------------------------------------
 // POST /api/accounts
 // ---------------------------------------------------------
 //
-// Ordre d'exécution :
+// 1. Vérifie que l'utilisateur est connecté.
+// 2. Valide les données.
+// 3. Crée le compte.
 //
-// 1. authenticateToken
-//    → vérifie que l'utilisateur est connecté.
-//
-// 2. createAccount
-//    → valide les données et crée le compte.
-//
-// Si authenticateToken refuse la requête,
-// createAccount n'est jamais exécuté.
 router.post(
     "/",
     authenticateToken,
     createAccount
 );
 
+// ---------------------------------------------------------
+// GET /api/accounts/:id
+// ---------------------------------------------------------
+//
+// Récupère les comptes associés à un utilisateur.
+// Ici, :id correspond à l'id de l'utilisateur.
+//
+router.get("/:id", async (req, res) => {
+
+    try {
+        const id = parseInt(req.params.id);
+
+        const account = await getAccountByUserId(id);
+
+        if (!account) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Aucun compte trouvé."
+            });
+        }
+
+        return res.json(account);
+
+    } catch (error) {
+
+        return res.status(500).json({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "Erreur lors de la récupération des comptes."
+        });
+    }
+});
 
 export default router;

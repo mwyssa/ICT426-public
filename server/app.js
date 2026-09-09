@@ -63,7 +63,7 @@ app.use(express.json());
 //
 // POST /api/auth/login
 app.use("/api/auth", authRoutes);
-
+app.use("/accounts", accountRoutes);
 // ---------------------------------------------------------
 // Routes des comptes bancaires
 // ---------------------------------------------------------
