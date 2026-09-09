@@ -1,189 +1,154 @@
-import AppLayout from "../layouts/AppLayout";
+//  AccountsPage — Consulter mes comptes bancaires (US-12-FE)
+//  Affiche la liste des comptes de l'utilisateur connecté, REGROUPÉS PAR TYPE
+//  (courant, epargne, ...). Gère les états : chargement, erreur, liste vide.
+//  Le bouton "Ajouter un compte" est en place : il sera branché sur le
+//  formulaire d'ajout (US-08) par la suite.
+
+import { useEffect, useState } from "react";              // états + effet au chargement
+import AppLayout from "../layouts/AppLayout";              // cadre commun (sidebar)
+import { getAccounts } from "../services/accountService";  // récupération des données
+import type { Account } from "../types/account";           // type d'un compte
+import moneyIcon from "../img/money.png";               // icône affichée devant chaque compte
+
+
+// Le solde est stocké en centimes (INT). On le transforme en montant lisible.
+// Ex: 218050 -> "2 180.50 CHF"
+function formatBalance(centimes: number): string {
+    const montant = centimes / 100;
+    return montant.toLocaleString("fr-CH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }) + " CHF";
+}
+
+// Regroupe les comptes par leur champ "type".
+// Renvoie un objet du genre : { courant: [...], epargne: [...] }
+function groupByType(accounts: Account[]): Record<string, Account[]> {
+    const groups: Record<string, Account[]> = {};
+    for (const account of accounts) {
+        // si le groupe n'existe pas encore, on le crée
+        if (!groups[account.type]) {
+            groups[account.type] = [];
+        }
+        groups[account.type].push(account);
+    }
+    return groups;
+}
+
+// Petite aide pour afficher un titre de catégorie lisible.
+// Ex: "courant" -> "Comptes courants"
+function categoryLabel(type: string): string {
+    const labels: Record<string, string> = {
+        courant: "Comptes courants",
+        epargne: "Comptes épargne",
+    };
+    return labels[type] ?? `Comptes ${type}`; // valeur par défaut si type inconnu
+}
 
 export default function AccountsPage() {
+
+    const [accounts, setAccounts] = useState<Account[]>([]); // la liste des comptes
+    const [loading, setLoading] = useState(true);            // true = chargement en cours
+    const [error, setError] = useState(false);               // true = la récupération a échoué
+
+
+    // useEffect avec [] = s'exécute une seule fois, au premier affichage.
+    useEffect(() => {
+        const fetchAccounts = async () => {
+            try {
+                setLoading(true);
+                setError(false);
+                const data = await getAccounts(); // appel au service
+                setAccounts(data);                // on stocke les comptes reçus
+            } catch {
+                setError(true);                   // en cas d'échec, on active l'erreur
+            } finally {
+                setLoading(false);                // dans tous les cas, on arrête le chargement
+            }
+        };
+
+        fetchAccounts();
+    }, []);
+
+    // On regroupe les comptes par type juste avant l'affichage.
+    const groupedAccounts = groupByType(accounts);
+
     return (
         <AppLayout>
+            {/* ----- EN-TÊTE : titre + bouton "Ajouter un compte" ----- */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1>Comptes</h1>
                     <h4 className="mt-4">Vue globale des comptes</h4>
                 </div>
 
+                {/* Bouton en place, sera branché sur le formulaire d'ajout (US-08) */}
                 <button className="btn btn-success">
-                    ↔ Transfert rapide
+                    + Ajouter un compte
                 </button>
             </div>
 
-            {/* Comptes courants */}
-            <div className="card mb-4">
-                <div className="card-body">
-                    <small className="text-uppercase text-muted">
-                        Comptes courants · Parents
-                    </small>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">🏦</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Compte courant · Papa
-                                </h5>
-
-                                <small className="text-muted">
-                                    •••• 4021
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">2 180 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
+            {/* ----- ÉTAT 1 : CHARGEMENT ----- */}
+            {loading && (
+                <div className="text-center my-5">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Chargement...</span>
                     </div>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">🏦</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Compte courant · Maman
-                                </h5>
-
-                                <small className="text-muted">
-                                    •••• 7788
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">1 640 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
-                    </div>
+                    <p className="mt-2">Chargement de vos comptes...</p>
                 </div>
-            </div>
+            )}
 
-            {/* Epargne */}
-            <div className="card mb-4">
-                <div className="card-body">
-                    <small className="text-uppercase text-muted">
-                        Épargne · Projets / Maison
-                    </small>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">✈️</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Projet Vacances
-                                </h5>
-
-                                <small className="text-muted">
-                                    Objectif 3 000 €
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">1 900 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">🏠</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Épargne Maison
-                                </h5>
-
-                                <small className="text-muted">
-                                    Livret
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">2 250 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
-                    </div>
+            {/* ----- ÉTAT 2 : ERREUR ----- */}
+            {!loading && error && (
+                <div className="alert alert-danger">
+                    Une erreur est survenue. Impossible de récupérer vos comptes.
                 </div>
-            </div>
+            )}
 
-            {/* Comptes enfants */}
-            <div className="card">
-                <div className="card-body">
-                    <small className="text-uppercase text-muted">
-                        Comptes dédiés · Enfants
-                    </small>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">🐷</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Argent de poche · Enfant A
-                                </h5>
-
-                                <small className="text-muted">
-                                    •••• 1102
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">45 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                        <div className="d-flex align-items-center">
-                            <div className="fs-2 me-3">🐷</div>
-
-                            <div>
-                                <h5 className="mb-0">
-                                    Argent de poche · Enfant B
-                                </h5>
-
-                                <small className="text-muted">
-                                    •••• 1103
-                                </small>
-                            </div>
-                        </div>
-
-                        <div className="d-flex align-items-center gap-3">
-                            <h5 className="mb-0">28 €</h5>
-
-                            <button className="btn btn-outline-secondary">
-                                →
-                            </button>
-                        </div>
-                    </div>
+            {/* ----- ÉTAT 3 : AUCUN COMPTE ----- */}
+            {!loading && !error && accounts.length === 0 && (
+                <div className="alert alert-info">
+                    Vous n'avez aucun compte bancaire pour le moment.
                 </div>
-            </div>
+            )}
+
+            {/* ----- ÉTAT 4 : LES COMPTES, REGROUPÉS PAR TYPE ----- */}
+            {!loading && !error && accounts.length > 0 && (
+                // On boucle sur chaque groupe (chaque type de compte).
+                // Object.keys(groupedAccounts) = la liste des types présents.
+                Object.keys(groupedAccounts).map((type) => (
+                    <div className="card mb-4" key={type}>
+                        <div className="card-body">
+                            {/* Titre de la catégorie */}
+                            <small className="text-uppercase text-muted">
+                                {categoryLabel(type)}
+                            </small>
+
+                            {/* Les comptes de ce groupe */}
+                            {groupedAccounts[type].map((account) => (
+                                <div
+                                    key={account.id}
+                                    className="d-flex justify-content-between align-items-center border-top pt-3 mt-3"
+                                >
+                                    <div className="d-flex align-items-center">
+                                        <img
+                                            src={moneyIcon}
+                                            alt=""
+                                            className="me-3"
+                                            style={{ width: "32px", height: "32px" }}
+                                        />
+                                        <div>
+                                            <h5 className="mb-0">{account.name}</h5>
+                                        </div>
+                                    </div>
+
+                                    <h5 className="mb-0">{formatBalance(account.balance)}</h5>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))
+            )}
         </AppLayout>
     );
 }
