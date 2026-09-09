@@ -65,8 +65,8 @@ export async function createAccount(req, res, next) {
             name: validation.name,
             balance: validation.balance,
             user_id: userId,
-            type_of_account_id:
-            validation.type_of_account_id
+            type:
+            validation.type
         };
 
 

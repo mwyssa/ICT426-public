@@ -21,7 +21,7 @@ export async function insertAccount(account) {
             name,
             balance,
             user_id,
-            type_of_account_id
+            type
         )
         VALUES (?, ?, ?, ?)
         `,
@@ -29,7 +29,7 @@ export async function insertAccount(account) {
             account.name,
             account.balance,
             account.user_id,
-            account.type_of_account_id
+            account.type
         ]
     );
 
@@ -58,7 +58,7 @@ export async function findAccountById(id) {
             name,
             balance,
             user_id,
-            type_of_account_id
+            type
         FROM Accounts
         WHERE id = ?
         LIMIT 1

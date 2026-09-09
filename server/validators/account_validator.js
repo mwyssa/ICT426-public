@@ -5,28 +5,27 @@
  * Données attendues :
  *
  * {
- *     "name": "Compte courant",
+ *     "name": "Compte principal",
  *     "balance": 1000,
- *     "type_of_account_id": 1
+ *     "type": "Compte Courant"
  * }
  *
- * user_id est récupéré depuis le token JWT.
+ * user_id n'est volontairement pas reçu ici.
+ * Il sera récupéré depuis le token JWT.
  *
  * @param {Object} data Données reçues dans req.body.
  * @returns {Object} Résultat de la validation.
  */
 export function validateCreateAccount(data = {}) {
 
-    // Contiendra toutes les erreurs trouvées.
+    // Objet qui contiendra toutes les erreurs détectées.
     const errors = {};
 
 
     // ---------------------------------------------------------
-    // 1. Validation du nom
+    // 1. Validation du nom du compte
     // ---------------------------------------------------------
 
-    // Vérifie que le nom est bien une chaîne de caractères.
-    // trim() supprime les espaces inutiles avant et après.
     const name =
         typeof data.name === "string"
             ? data.name.trim()
@@ -37,8 +36,7 @@ export function validateCreateAccount(data = {}) {
         errors.name = "Le nom du compte est obligatoire.";
     }
 
-        // La colonne MySQL est VARCHAR(45),
-    // donc on refuse les noms trop longs.
+    // La colonne MySQL est VARCHAR(45).
     else if (name.length > 45) {
         errors.name =
             "Le nom du compte ne peut pas dépasser 45 caractères.";
@@ -51,8 +49,8 @@ export function validateCreateAccount(data = {}) {
 
     let balance;
 
-    // Si aucun solde n'est envoyé,
-    // on considère que le nouveau compte commence à 0.
+    // Si aucun solde n'est fourni,
+    // le compte commence à 0.
     if (
         data.balance === undefined ||
         data.balance === null ||
@@ -61,18 +59,15 @@ export function validateCreateAccount(data = {}) {
         balance = 0;
     } else {
 
-        // Les champs HTML renvoient souvent des chaînes,
-        // même lorsqu'ils représentent des nombres.
+        // Les champs HTML peuvent envoyer les nombres
+        // sous forme de chaînes de caractères.
         //
-        // Par exemple :
-        // "1500"
-        //
-        // devient :
-        // 1500
+        // Exemple :
+        // "1500" → 1500
         balance = Number(data.balance);
 
-        // La colonne MySQL est de type INT.
-        // On vérifie donc qu'il s'agit bien d'un entier.
+        // La colonne MySQL étant de type INT,
+        // on accepte uniquement les nombres entiers.
         if (!Number.isInteger(balance)) {
             errors.balance =
                 "Le solde doit être un nombre entier.";
@@ -84,45 +79,39 @@ export function validateCreateAccount(data = {}) {
     // 3. Validation du type de compte
     // ---------------------------------------------------------
 
-    let typeOfAccountId = null;
+    const type =
+        typeof data.type === "string"
+            ? data.type.trim()
+            : "";
 
-    // Le type de compte est obligatoire.
-    if (
-        data.type_of_account_id === undefined ||
-        data.type_of_account_id === null ||
-        data.type_of_account_id === ""
-    ) {
-        errors.type_of_account_id =
+    // Le type est obligatoire.
+    if (!type) {
+        errors.type =
             "Le type de compte est obligatoire.";
-    } else {
+    }
 
-        typeOfAccountId = Number(data.type_of_account_id);
-
-        // L'id doit être un entier positif.
-        if (
-            !Number.isInteger(typeOfAccountId) ||
-            typeOfAccountId <= 0
-        ) {
-            errors.type_of_account_id =
-                "Le type de compte est invalide.";
-        }
+    // La colonne MySQL est VARCHAR(45).
+    else if (type.length > 45) {
+        errors.type =
+            "Le type de compte ne peut pas dépasser 45 caractères.";
     }
 
 
     // ---------------------------------------------------------
-    // 4. Résultat
+    // 4. Résultat de la validation
     // ---------------------------------------------------------
 
     return {
-        // true uniquement si aucune erreur n'a été ajoutée.
+        // La validation est correcte uniquement
+        // si aucune erreur n'a été ajoutée.
         valid: Object.keys(errors).length === 0,
 
         // Liste des éventuelles erreurs.
         errors,
 
-        // Données nettoyées et converties.
+        // Données nettoyées.
         name,
         balance,
-        type_of_account_id: typeOfAccountId
+        type
     };
 }
