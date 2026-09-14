@@ -1,31 +1,79 @@
-//  accountService — accès aux données des comptes bancaires
-//  Seul endroit qui "parle" au backend. Pour l'instant : mock (fausses
-//  données). Plus tard : on décommente le fetch, sans rien changer ailleurs.
+// accountService — accès aux données des comptes bancaires
+//
+// Toute communication avec le backend concernant les comptes
+// passe par ce fichier.
 
 import type { Account } from "../types/account";
 
-// Récupère la liste des comptes de l'utilisateur connecté.
+const API_URL = "http://localhost:3000/api/accounts";
+
+// ---------------------------------------------------------
+// Récupérer les comptes de l'utilisateur connecté
+// ---------------------------------------------------------
+
 export async function getAccounts(): Promise<Account[]> {
-    // --- Version MOCK (temporaire, tant que le backend n'est pas prêt) ---
-    // Les soldes sont en CENTIMES, comme le fera la base (balance = INT).
-    // Petit délai artificiel pour voir l'état de chargement à l'écran :
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    const token = localStorage.getItem("token");
 
-    // test de message d'erreur
-    //throw new Error("test");
+    const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token
+                ? {
+                    Authorization: `Bearer ${token}`,
+                }
+                : {}),
+        },
+    });
 
-    // a tout mettre en commentaire si veut test le message "vous n'avez pas de compte.."
-    return [
-       { id: 1, name: "Compte courant", balance: 218050, type: "courant" },
-       { id: 2, name: "Compte épargne", balance: 564000, type: "epargne" },
-       { id: 3, name: "Compte commun",  balance: 132075, type: "courant" },
-    ];
+    const data = await response.json();
 
-    // test pour avoir le message "vous n'avez pas de comptes..."
-    //return [];
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Impossible de récupérer les comptes."
+        );
+    }
 
-    // --- Version BACKEND (à activer quand l'API existera) ---
-    // const res = await fetch("http://localhost:8080/api/accounts");
-    // if (!res.ok) throw new Error("Impossible de récupérer les comptes");
-    // return res.json();
+    return data;
+}
+
+// ---------------------------------------------------------
+// Créer un compte bancaire
+// ---------------------------------------------------------
+
+export type CreateAccountData = {
+    name: string;
+    balance: number;
+    type: string;
+};
+
+export async function createAccount(
+    account: CreateAccountData
+): Promise<Account> {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token
+                ? {
+                    Authorization: `Bearer ${token}`,
+                }
+                : {}),
+        },
+        body: JSON.stringify(account),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Impossible d'ajouter le compte."
+        );
+    }
+
+    return data;
 }
