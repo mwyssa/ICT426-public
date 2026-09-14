@@ -65,3 +65,16 @@ export async function getAccountByUserId(userId) {
 
     return rows || null;
 }
+
+// calcul du solde total de tous les comptes d'un utilisateur
+export async function getTotalBalanceByUserId(userId) {
+    const [rows] = await pool.execute(
+        `
+        SELECT SUM(balance) as total_balance
+        FROM accounts
+        WHERE user_id = ?
+        `,
+        [userId]
+    );
+    return rows[0]?.total_balance || 0;
+}

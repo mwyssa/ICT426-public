@@ -10,9 +10,10 @@ import {
     authenticateToken
 } from "../middleware/auth_middleware.js";
 
-// Fonction permettant de récupérer les comptes d'un utilisateur.
+// Fonctions permettant de récupérer les comptes et le solde total.
 import {
-    getAccountByUserId
+    getAccountByUserId,
+    getTotalBalanceByUserId
 } from "../models/account_model.js";
 
 const router = express.Router();
@@ -36,7 +37,7 @@ router.post(
 // ---------------------------------------------------------
 //
 // Récupère les comptes associés à un utilisateur.
-// Ici, :id correspond à l'id de l'utilisateur.
+// :id correspond à l'id de l'utilisateur.
 //
 router.get("/:id", async (req, res) => {
 
@@ -59,6 +60,34 @@ router.get("/:id", async (req, res) => {
         return res.status(500).json({
             error: "INTERNAL_SERVER_ERROR",
             message: "Erreur lors de la récupération des comptes."
+        });
+    }
+});
+
+// ---------------------------------------------------------
+// GET /api/accounts/:id/total-balance
+// ---------------------------------------------------------
+//
+// Récupère le solde total de tous les comptes
+// d'un utilisateur.
+//
+router.get("/:id/total-balance", async (req, res) => {
+
+    try {
+        const id = parseInt(req.params.id);
+
+        const totalBalance =
+            await getTotalBalanceByUserId(id);
+
+        return res.json({
+            total_balance: totalBalance
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "Erreur lors de la récupération du solde total."
         });
     }
 });
