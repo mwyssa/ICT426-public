@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-    createAccount,
-} from "../services/accountService";
+import { createAccount } from "../services/accountService";
 
 type AddAccountModalProps = {
     show: boolean;
@@ -14,7 +12,6 @@ export default function AddAccountModal({
                                             onClose,
                                             onAccountCreated,
                                         }: AddAccountModalProps) {
-
     // -----------------------------------------------------
     // États du formulaire
     // -----------------------------------------------------
@@ -35,7 +32,6 @@ export default function AddAccountModal({
 
     const [apiError, setApiError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-
     const [isLoading, setIsLoading] = useState(false);
 
     // -----------------------------------------------------
@@ -55,7 +51,6 @@ export default function AddAccountModal({
 
             setApiError("");
             setSuccessMessage("");
-
             setIsLoading(false);
         }
     }, [show]);
@@ -73,11 +68,11 @@ export default function AddAccountModal({
     // -----------------------------------------------------
 
     const handleSubmit = async (
-        event: React.FormEvent
+        event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
 
-        // Réinitialiser les erreurs
+        // Réinitialisation des erreurs
         setNameError("");
         setBalanceError("");
         setTypeError("");
@@ -90,11 +85,17 @@ export default function AddAccountModal({
         // Validation du nom
         // -------------------------------------------------
 
-        if (!name.trim()) {
+        const trimmedName = name.trim();
+
+        if (!trimmedName) {
             setNameError(
                 "Veuillez saisir le nom du compte."
             );
-
+            isValid = false;
+        } else if (trimmedName.length > 45) {
+            setNameError(
+                "Le nom du compte ne peut pas dépasser 45 caractères."
+            );
             isValid = false;
         }
 
@@ -102,76 +103,88 @@ export default function AddAccountModal({
         // Validation du solde
         // -------------------------------------------------
 
+        const numericBalance = Number(balance);
+
         if (!balance.trim()) {
             setBalanceError(
                 "Veuillez saisir le solde initial."
             );
-
             isValid = false;
-        } else {
-            const numericBalance = Number(balance);
-
-            if (!Number.isFinite(numericBalance)) {
-                setBalanceError(
-                    "Le solde doit être un nombre."
-                );
-
-                isValid = false;
-            } else if (numericBalance < 0) {
-                setBalanceError(
-                    "Le solde ne peut pas être négatif."
-                );
-
-                isValid = false;
-            }
+        } else if (!Number.isFinite(numericBalance)) {
+            setBalanceError(
+                "Le solde doit être un nombre."
+            );
+            isValid = false;
+        } else if (!Number.isInteger(numericBalance)) {
+            setBalanceError(
+                "Le solde doit être un nombre entier."
+            );
+            isValid = false;
+        } else if (numericBalance < 0) {
+            setBalanceError(
+                "Le solde ne peut pas être négatif."
+            );
+            isValid = false;
         }
 
         // -------------------------------------------------
         // Validation du type personnalisé
         // -------------------------------------------------
 
+        const trimmedCustomType = customType.trim();
+
         if (
             accountType === "Autre" &&
-            !customType.trim()
+            !trimmedCustomType
         ) {
             setTypeError(
                 "Veuillez saisir le type de compte."
             );
-
+            isValid = false;
+        } else if (
+            accountType === "Autre" &&
+            trimmedCustomType.length > 45
+        ) {
+            setTypeError(
+                "Le type de compte ne peut pas dépasser 45 caractères."
+            );
             isValid = false;
         }
 
+        // Si une validation échoue, on n'envoie rien
         if (!isValid) {
             return;
         }
 
         // -------------------------------------------------
-        // Type final envoyé au backend
+        // Détermination du type final
         // -------------------------------------------------
 
         const finalType =
             accountType === "Autre"
-                ? customType.trim()
+                ? trimmedCustomType
                 : accountType;
 
         // -------------------------------------------------
-        // Conversion du solde CHF → centimes
+        // Envoi au backend
         // -------------------------------------------------
-
-        const balanceInCents = Math.round(
-            Number(balance) * 100
-        );
+        // IMPORTANT :
+        // Le backend attend directement un entier.
+        // On n'effectue donc PAS de multiplication par 100.
+        //
+        // Exemple :
+        // 696969 dans le formulaire
+        //        ↓
+        // 696969 envoyé au backend
+        //        ↓
+        // 696969 en DB
 
         try {
             setIsLoading(true);
 
-            // -------------------------------------------------
-            // Création du compte via accountService
-            // -------------------------------------------------
-
             await createAccount({
-                name: name.trim(),
-                balance: balanceInCents,
+                name: trimmedName,
+                balance: numericBalance,
                 type: finalType,
             });
 
@@ -183,7 +196,7 @@ export default function AddAccountModal({
                 "Le compte a été ajouté avec succès."
             );
 
-            // Recharge la liste des comptes
+            // Informe AccountsPage qu'un compte a été créé
             onAccountCreated();
 
             // Ferme le modal après une seconde
@@ -192,20 +205,18 @@ export default function AddAccountModal({
             }, 1000);
 
         } catch (error) {
-
             setApiError(
                 error instanceof Error
                     ? error.message
-                    : "Une erreur est survenue."
+                    : "Une erreur est survenue lors de la création du compte."
             );
-
         } finally {
             setIsLoading(false);
         }
     };
 
     // -----------------------------------------------------
-    // Affichage
+    // Affichage du modal
     // -----------------------------------------------------
 
     return (
@@ -213,20 +224,19 @@ export default function AddAccountModal({
             className="modal fade show d-block"
             tabIndex={-1}
             role="dialog"
+            aria-modal="true"
             style={{
-                backgroundColor:
-                    "rgba(0,0,0,0.5)",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
             }}
         >
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
 
-                    {/* -----------------------------------------
+                    {/* -------------------------------------------------
                         HEADER
-                    ------------------------------------------ */}
+                    ------------------------------------------------- */}
 
                     <div className="modal-header">
-
                         <h5 className="modal-title">
                             Ajouter un compte bancaire
                         </h5>
@@ -234,15 +244,15 @@ export default function AddAccountModal({
                         <button
                             type="button"
                             className="btn-close"
+                            aria-label="Fermer"
                             onClick={onClose}
                             disabled={isLoading}
                         />
-
                     </div>
 
-                    {/* -----------------------------------------
+                    {/* -------------------------------------------------
                         FORMULAIRE
-                    ------------------------------------------ */}
+                    ------------------------------------------------- */}
 
                     <form onSubmit={handleSubmit}>
 
@@ -251,22 +261,28 @@ export default function AddAccountModal({
                             {/* Erreur API */}
 
                             {apiError && (
-                                <div className="alert alert-danger">
+                                <div
+                                    className="alert alert-danger"
+                                    role="alert"
+                                >
                                     {apiError}
                                 </div>
                             )}
 
-                            {/* Succès */}
+                            {/* Message de succès */}
 
                             {successMessage && (
-                                <div className="alert alert-success">
+                                <div
+                                    className="alert alert-success"
+                                    role="alert"
+                                >
                                     {successMessage}
                                 </div>
                             )}
 
-                            {/* ---------------------------------
+                            {/* -------------------------------------------------
                                 NOM DU COMPTE
-                            ---------------------------------- */}
+                            ------------------------------------------------- */}
 
                             <div className="mb-3">
 
@@ -293,6 +309,7 @@ export default function AddAccountModal({
                                         )
                                     }
                                     disabled={isLoading}
+                                    maxLength={45}
                                 />
 
                                 {nameError && (
@@ -303,9 +320,9 @@ export default function AddAccountModal({
 
                             </div>
 
-                            {/* ---------------------------------
+                            {/* -------------------------------------------------
                                 SOLDE INITIAL
-                            ---------------------------------- */}
+                            ------------------------------------------------- */}
 
                             <div className="mb-3">
 
@@ -320,13 +337,13 @@ export default function AddAccountModal({
                                     id="accountBalance"
                                     type="number"
                                     min="0"
-                                    step="0.01"
+                                    step="1"
                                     className={`form-control ${
                                         balanceError
                                             ? "is-invalid"
                                             : ""
                                     }`}
-                                    placeholder="0.00"
+                                    placeholder="0"
                                     value={balance}
                                     onChange={(e) =>
                                         setBalance(
@@ -344,9 +361,9 @@ export default function AddAccountModal({
 
                             </div>
 
-                            {/* ---------------------------------
+                            {/* -------------------------------------------------
                                 TYPE DE COMPTE
-                            ---------------------------------- */}
+                            ------------------------------------------------- */}
 
                             <div className="mb-3">
 
@@ -362,28 +379,20 @@ export default function AddAccountModal({
                                     className="form-select"
                                     value={accountType}
                                     onChange={(e) => {
-
                                         const value =
                                             e.target.value;
 
                                         setAccountType(value);
 
-                                        // Si on revient à un
-                                        // type prédéfini,
-                                        // on efface le champ
-                                        // personnalisé.
-
-                                        if (
-                                            value !== "Autre"
-                                        ) {
+                                        // Si on quitte "Autre",
+                                        // on efface le type personnalisé
+                                        if (value !== "Autre") {
                                             setCustomType("");
                                             setTypeError("");
                                         }
-
                                     }}
                                     disabled={isLoading}
                                 >
-
                                     <option value="Compte Courant">
                                         Compte courant
                                     </option>
@@ -395,17 +404,15 @@ export default function AddAccountModal({
                                     <option value="Autre">
                                         Autre
                                     </option>
-
                                 </select>
 
                             </div>
 
-                            {/* ---------------------------------
+                            {/* -------------------------------------------------
                                 TYPE PERSONNALISÉ
-                            ---------------------------------- */}
+                            ------------------------------------------------- */}
 
                             {accountType === "Autre" && (
-
                                 <div className="mb-3">
 
                                     <label
@@ -431,6 +438,7 @@ export default function AddAccountModal({
                                             )
                                         }
                                         disabled={isLoading}
+                                        maxLength={45}
                                     />
 
                                     {typeError && (
@@ -444,9 +452,9 @@ export default function AddAccountModal({
 
                         </div>
 
-                        {/* -----------------------------------------
+                        {/* -------------------------------------------------
                             FOOTER
-                        ------------------------------------------ */}
+                        ------------------------------------------------- */}
 
                         <div className="modal-footer">
 

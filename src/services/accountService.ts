@@ -53,15 +53,15 @@ export async function createAccount(
 ): Promise<Account> {
     const token = localStorage.getItem("token");
 
+    if (!token) {
+        throw new Error("Vous devez être connecté.");
+    }
+
     const response = await fetch(API_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            ...(token
-                ? {
-                    Authorization: `Bearer ${token}`,
-                }
-                : {}),
+            Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(account),
     });
@@ -70,10 +70,9 @@ export async function createAccount(
 
     if (!response.ok) {
         throw new Error(
-            data.message ||
-            "Impossible d'ajouter le compte."
+            data.message || "Impossible d'ajouter le compte."
         );
     }
 
-    return data;
+    return data.account;
 }
