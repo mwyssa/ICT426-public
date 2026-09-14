@@ -78,3 +78,16 @@ export async function getTotalBalanceByUserId(userId) {
     );
     return rows[0]?.total_balance || 0;
 }
+
+// récupération du solde d'un compte spécifique par l'id de l'utilisateur et l'id du compte
+export async function getAccountBalanceByUserIdAndAccountId(userId, accountId) {
+    const [rows] = await pool.execute(
+        `
+        SELECT name, balance, type
+        FROM accounts
+        WHERE user_id = ? AND id = ?
+        `,
+        [userId, accountId]
+    );
+    return rows || 0;
+}

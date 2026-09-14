@@ -10,10 +10,11 @@ import {
     authenticateToken
 } from "../middleware/auth_middleware.js";
 
-// Fonctions permettant de récupérer les comptes et le solde total.
+// Fonctions permettant de récupérer les comptes et les soldes.
 import {
     getAccountByUserId,
-    getTotalBalanceByUserId
+    getTotalBalanceByUserId,
+    getAccountBalanceByUserIdAndAccountId
 } from "../models/account_model.js";
 
 const router = express.Router();
@@ -68,8 +69,7 @@ router.get("/:id", async (req, res) => {
 // GET /api/accounts/:id/total-balance
 // ---------------------------------------------------------
 //
-// Récupère le solde total de tous les comptes
-// d'un utilisateur.
+// Récupère le solde total de tous les comptes d'un utilisateur.
 //
 router.get("/:id/total-balance", async (req, res) => {
 
@@ -78,6 +78,13 @@ router.get("/:id/total-balance", async (req, res) => {
 
         const totalBalance =
             await getTotalBalanceByUserId(id);
+
+        if (!totalBalance) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Aucun compte trouvé pour cet utilisateur."
+            });
+        }
 
         return res.json({
             total_balance: totalBalance
@@ -88,6 +95,49 @@ router.get("/:id/total-balance", async (req, res) => {
         return res.status(500).json({
             error: "INTERNAL_SERVER_ERROR",
             message: "Erreur lors de la récupération du solde total."
+        });
+    }
+});
+
+// ---------------------------------------------------------
+// GET /api/accounts/:userId/:accountId
+// ---------------------------------------------------------
+//
+// Récupère le solde d'un compte spécifique.
+//
+router.get("/:userId/:accountId", async (req, res) => {
+
+    try {
+        const userId = parseInt(req.params.userId);
+        const accountId = parseInt(req.params.accountId);
+
+        const accountInfo =
+            await getAccountBalanceByUserIdAndAccountId(
+                userId,
+                accountId
+            );
+
+        if (!accountInfo) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Compte non trouvé."
+            });
+        }
+
+        if (accountInfo.length === 0) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Compte non trouvé."
+            });
+        }
+
+        return res.json(accountInfo);
+
+    } catch (error) {
+
+        return res.status(500).json({
+            error: "INTERNAL_SERVER_ERROR",
+            message: "Erreur lors de la récupération du compte."
         });
     }
 });
