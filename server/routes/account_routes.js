@@ -1,7 +1,7 @@
 
 import express from "express";
 import { authenticateToken } from "../middleware/auth_middleware.js";
-
+import { getMyAccounts } from "../controllers/account_controller.js";
 // ---------------------------------------------------------
 // GET /api/accounts
 // ---------------------------------------------------------
@@ -13,12 +13,7 @@ import { authenticateToken } from "../middleware/auth_middleware.js";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, async (req, res) => {
-    res.json({
-        message: "Route accounts protégée",
-        userId: req.user.id
-    });
-});
+router.get("/", authenticateToken, getMyAccounts);
 
 export default router;
 
