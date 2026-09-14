@@ -7,10 +7,11 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 // Fonction permettant de rechercher un utilisateur dans MySQL.
-import { findUserByEmail } from "../models/user_model.js";
+import { findUserByEmail, createUser } from "../models/user_model.js";
 
 // Fonction permettant de valider email + mot de passe.
-import { validateLogin } from "../validators/auth_validator.js";
+// on importe pour le login et l'inscription/ création
+import { validateLogin, validateRegister } from "../validators/auth_validator.js";
 
 
 /**
