@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { login } from "../../services/authService";
 
 export default function LoginPage() {
@@ -13,6 +13,11 @@ export default function LoginPage() {
 
     const [apiError, setApiError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    // Un utilisateur déjà connecté n'a pas besoin de revoir la page de connexion.
+    if (localStorage.getItem("token")) {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
