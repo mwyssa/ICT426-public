@@ -1,78 +1,45 @@
-// accountService — accès aux données des comptes bancaires
-//
-// Toute communication avec le backend concernant les comptes
-// passe par ce fichier.
-
+// ============================================================================
+//  accountService — accès aux données des comptes bancaires
+//  Appelle le vrai backend (API Express sur http://localhost:3000).
+// ============================================================================
 import type { Account } from "../types/account";
 
-const API_URL = "http://localhost:3000/api/accounts";
-
-// ---------------------------------------------------------
-// Récupérer les comptes de l'utilisateur connecté
-// ---------------------------------------------------------
-
-export async function getAccounts(): Promise<Account[]> {
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(API_URL, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            ...(token
-                ? {
-                    Authorization: `Bearer ${token}`,
-                }
-                : {}),
-        },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(
-            data.message ||
-            "Impossible de récupérer les comptes."
-        );
+// Récupère l'id de l'utilisateur connecté depuis le localStorage.
+// Le login y stocke l'objet "user" (ex: {"id":7,"name":"Han",...}).
+function getUserId(): number {
+    const stored = localStorage.getItem("user");
+    if (!stored) {
+        throw new Error("Utilisateur non connecté");
     }
-
-    return data;
+    const user = JSON.parse(stored);
+    return user.id;
 }
 
-// ---------------------------------------------------------
-// Créer un compte bancaire
-// ---------------------------------------------------------
+// Récupère la liste des comptes de l'utilisateur connecté.
+export async function getAccounts(): Promise<Account[]> {
+    const userId = getUserId();
 
-export type CreateAccountData = {
-    name: string;
-    balance: number;
-    type: string;
-};
+    const res = await fetch(`http://localhost:3000/api/accounts/${userId}`);
 
-export async function createAccount(
-    account: CreateAccountData
-): Promise<Account> {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        throw new Error("Vous devez être connecté.");
+    if (!res.ok) {
+        throw new Error("Impossible de récupérer les comptes");
     }
 
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(account),
-    });
+    return res.json();
+}
 
-    const data = await response.json();
+// Récupère le solde TOTAL de tous les comptes de l'utilisateur connecté.
+// La route renvoie { total_balance: "14000" } — la valeur est une CHAÎNE,
+// on la convertit en nombre avec Number() pour pouvoir la formater ensuite.
+export async function getTotalBalance(): Promise<number> {
+    const userId = getUserId();
 
-    if (!response.ok) {
-        throw new Error(
-            data.message || "Impossible d'ajouter le compte."
-        );
+    const res = await fetch(`http://localhost:3000/api/accounts/${userId}/total-balance`);
+
+    if (!res.ok) {
+        throw new Error("Impossible de récupérer le solde total");
     }
 
-    return data.account;
+    const data = await res.json();
+    return Number(data.total_balance); // conversion texte -> nombre
 }
