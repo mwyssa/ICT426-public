@@ -37,3 +37,38 @@ export async function findUserByEmail(email) {
     // Sinon, on retourne null.
     return rows[0] || null;
 }
+
+/**
+ * Crée un nouvel utilisateur en base de données.
+ *
+ * @param {string} email Adresse email de l'utilisateur.
+ * @param {string} hashedPassword Mot de passe haché (via bcrypt).
+ * @returns {number} ID du nouvel utilisateur inséré.
+ */
+export async function createUser(email, hashedPassword) {
+    // on déclare la fonction asynchrone qui va intéragir avec la BD
+    // elle prends en paramètre l'email de l'user et son mot de passe déjà hashé
+
+    //on déclare ici les valeurs par défaut pour satisfaire le not null de la BD
+    const defaultName = email.split('@')[0];    // .split va découper la chaîne de l'email pourtout pù elle trouve @
+                                                        // les tableaux commencent $ l'index 0. mettre 0 à la fin permets de récupérer le premier morceau du tableau crée (donc ce qui se trouve vant @.
+    const defaultRole = 'user';
+    const defaultFamilyId = 1;
+// on mets defult car la BD est stricte mais dans les faits dans postman on va juste envoyer le mail et le mot de passe.
+
+    const [result] = await pool.execute(    // await pour attendre que la requête SQL se termine
+                                            // pool.execute() c'est léa méthode de MySQL2 pour exécuter la requête de manière safe
+        // result ici c'est l'objet que la base de donnée renvoie quand la requête d'insertion est terminée.
+        // y'a result entre crochets car mysql2 renvoie un tableau avec les données/résultats de la requête et les métadonnées
+        // const [result] = ... est utile pour desctructurer un tableau en javascript.
+        `
+        INSERT INTO Users (name, mail, hash, role, family_id)
+        VALUES (?, ?, ?, ?, ?)
+        `,  //ces champs sont not null dans la BD
+        // on insère une nouvelle ligne dans la table Users en remplissant les colonnes mail et hash
+        // les ? c'est des paramètres de substitutions pour la sécurité comme Andolfatto avait expliqué.
+        [defaultName, email, hashedPassword, defaultRole, defaultFamilyId] // c'est le tableau de valeur qui vient remplacer les ?
+    );
+
+    return result.insertId; // result.insertID récupère l'ID qui vient d'être généré par la table sql en auto-incrémentation.
+}
