@@ -7,7 +7,10 @@ import cors from "cors";
 
 // Import des routes.
 import authRoutes from "./routes/auth_routes.js";
+import accountsRoutes from "./routes/account_routes.js";
+import transactionsRoutes from "./routes/transaction_routes.js";
 
+// import accountsRoutes from "./routes/account_routes.js";
 
 // Middleware global de gestion des erreurs.
 import { errorHandler } from "./middleware/error_middleware.js";
@@ -62,7 +65,11 @@ app.use(express.json());
 //
 // POST /api/auth/login
 app.use("/api/auth", authRoutes);
-
+// Connexion du routeur des comptes à l'application Express.
+// Toutes les routes définies dans accountsRoutes seront accessibles
+// via le préfixe /api/accounts
+app.use("/api/accounts", accountsRoutes);
+app.use("/api/transactions", transactionsRoutes);
 // ---------------------------------------------------------
 // Route inexistante
 // ---------------------------------------------------------
@@ -87,6 +94,10 @@ app.use((req, res) => {
 // Les erreurs transmises avec next(error)
 // arriveront dans errorHandler.
 app.use(errorHandler);
+
+
+
+
 
 
 // Export de l'application pour server.js.
