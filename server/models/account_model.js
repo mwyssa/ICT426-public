@@ -91,3 +91,29 @@ export async function getAccountBalanceByUserIdAndAccountId(userId, accountId) {
     );
     return rows || 0;
 }
+
+/**
+ * Supprime un compte bancaire appartenant à un utilisateur.
+ *
+ * @param {number} accountId ID du compte à supprimer.
+ * @param {number} userId ID de l'utilisateur connecté.
+ * @returns {number} Nombre de lignes supprimées.
+ */
+export async function deleteAccountByIdAndUserId(
+    accountId,
+    userId
+) {
+    const [result] = await pool.execute(
+        `
+        DELETE FROM Accounts
+        WHERE id = ?
+          AND user_id = ?
+        `,
+        [
+            accountId,
+            userId
+        ]
+    );
+
+    return result.affectedRows;
+}

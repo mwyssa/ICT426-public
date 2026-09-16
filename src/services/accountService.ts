@@ -76,3 +76,35 @@ export async function createAccount(
 
     return data.account;
 }
+
+// ---------------------------------------------------------
+// Supprimer un compte bancaire
+// ---------------------------------------------------------
+export async function deleteAccount(
+    accountId: number
+): Promise<void> {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        throw new Error("Vous devez être connecté.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/${accountId}`,
+        {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Impossible de supprimer le compte."
+        );
+    }
+}

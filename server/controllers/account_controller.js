@@ -6,7 +6,8 @@ import {
 // Fonctions permettant d'accéder à MySQL.
 import {
     insertAccount,
-    findAccountById
+    findAccountById,
+    deleteAccountByIdAndUserId
 } from "../models/account_model.js";
 
 
@@ -98,6 +99,89 @@ export async function createAccount(req, res, next) {
 
         // Toute erreur imprévue est transmise au
         // middleware global errorHandler.
+        next(error);
+    }
+}
+
+/**
+ * Supprime un compte bancaire.
+ *
+ * Endpoint :
+ * DELETE /api/accounts/:id
+ *
+ * Le compte doit appartenir à l'utilisateur connecté.
+ */
+export async function deleteAccount(req, res, next) {
+
+    try {
+
+        // ---------------------------------------------------------
+        // 1. Récupération de l'identifiant du compte
+        // ---------------------------------------------------------
+
+        const accountId = Number(req.params.id);
+
+        if (!Number.isInteger(accountId) || accountId <= 0) {
+            return res.status(400).json({
+                error: "INVALID_ACCOUNT_ID",
+                message: "L'identifiant du compte est invalide."
+            });
+        }
+
+        // ---------------------------------------------------------
+        // 2. Récupération de l'utilisateur connecté
+        // ---------------------------------------------------------
+
+        const userId = req.user.id;
+
+        // ---------------------------------------------------------
+        // 3. Suppression du compte
+        // ---------------------------------------------------------
+
+        const deletedRows =
+            await deleteAccountByIdAndUserId(
+                accountId,
+                userId
+            );
+
+        // Aucun compte supprimé signifie :
+        // - compte inexistant
+        // - ou compte appartenant à un autre utilisateur
+        if (deletedRows === 0) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Compte bancaire introuvable."
+            });
+        }
+
+        // ---------------------------------------------------------
+        // 4. Succès
+        // ---------------------------------------------------------
+
+        return res.status(200).json({
+            message: "Compte bancaire supprimé avec succès."
+        });
+
+    } catch (error) {
+
+        // ---------------------------------------------------------
+        // 5. Compte possédant encore des transactions
+        // ---------------------------------------------------------
+
+        // MariaDB/MySQL peut refuser la suppression à cause
+        // de la clé étrangère Transactions.account_id.
+        if (error.code === "ER_ROW_IS_REFERENCED_2") {
+            return res.status(409).json({
+                error: "ACCOUNT_HAS_TRANSACTIONS",
+                message:
+                    "Impossible de supprimer ce compte car il possède des transactions."
+            });
+        }
+
+        // ---------------------------------------------------------
+        // 6. Erreur inattendue
+        // ---------------------------------------------------------
+
         next(error);
     }
 }

@@ -2,7 +2,8 @@ import express from "express";
 
 // Contrôleur chargé de créer le compte.
 import {
-    createAccount
+    createAccount,
+    deleteAccount
 } from "../controllers/account_controller.js";
 
 // Middleware chargé de vérifier le token JWT.
@@ -31,6 +32,21 @@ router.post(
     "/",
     authenticateToken,
     createAccount
+);
+// ---------------------------------------------------------
+// DELETE /api/accounts/:id
+// ---------------------------------------------------------
+//
+// 1. Vérifie que l'utilisateur est connecté.
+// 2. Vérifie que le compte appartient à l'utilisateur.
+// 3. Supprime le compte.
+//
+// ---------------------------------------------------------
+
+router.delete(
+    "/:id",
+    authenticateToken,
+    deleteAccount
 );
 
 // ---------------------------------------------------------
