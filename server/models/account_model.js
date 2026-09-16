@@ -55,8 +55,10 @@ export async function getAccountByUserId(userId) {
     const [rows] = await pool.execute(
         `
         SELECT
+            id,
             name,
-            balance
+            balance,
+            type
         FROM Accounts
         WHERE user_id = ?
         `,
