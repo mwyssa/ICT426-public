@@ -1,11 +1,7 @@
 // AccountsPage — Consulter mes comptes bancaires (US-12-FE)
 // + Ajout d'un compte bancaire (US-08-FE)
 // + Suppression d'un compte bancaire (US-08-FE)
-//
-// Affiche la liste des comptes de l'utilisateur connecté,
-// regroupés par type.
-// Gère les états : chargement, erreur, liste vide.
-// Permet d'ajouter et de supprimer un compte bancaire.
+// + Solde total
 
 import { useEffect, useState } from "react";
 
@@ -13,6 +9,7 @@ import AppLayout from "../layouts/AppLayout";
 
 import {
     getAccounts,
+    getTotalBalance,
     deleteAccount,
 } from "../services/accountService";
 
@@ -25,8 +22,7 @@ import AddAccountModal from "../components/AddAccountModal";
 // ---------------------------------------------------------
 // Formatage du solde
 // ---------------------------------------------------------
-// Le solde est stocké directement dans la DB.
-// Exemple : 696969 -> "696 969,00 CHF"
+
 function formatBalance(balance: number): string {
     return (
         balance.toLocaleString("fr-CH", {
@@ -89,6 +85,11 @@ export default function AccountsPage() {
     ] = useState<Account[]>([]);
 
     const [
+        totalBalance,
+        setTotalBalance,
+    ] = useState<number | null>(null);
+
+    const [
         loading,
         setLoading,
     ] = useState(true);
@@ -98,25 +99,22 @@ export default function AccountsPage() {
         setError,
     ] = useState(false);
 
-    // Compte actuellement sélectionné pour suppression
+    // Suppression
     const [
         accountToDelete,
         setAccountToDelete,
     ] = useState<Account | null>(null);
 
-    // Suppression en cours
     const [
         isDeleting,
         setIsDeleting,
     ] = useState(false);
 
-    // Erreur de suppression
     const [
         deleteError,
         setDeleteError,
     ] = useState("");
 
-    // Message de succès
     const [
         deleteSuccess,
         setDeleteSuccess,
@@ -148,11 +146,31 @@ export default function AccountsPage() {
     };
 
     // -----------------------------------------------------
+    // Chargement du solde total
+    // -----------------------------------------------------
+
+    const fetchTotalBalance = async () => {
+
+        try {
+
+            const total = await getTotalBalance();
+
+            setTotalBalance(total);
+
+        } catch {
+
+            // Le total est indépendant de la liste des comptes.
+            setTotalBalance(null);
+        }
+    };
+
+    // -----------------------------------------------------
     // Chargement initial
     // -----------------------------------------------------
 
     useEffect(() => {
         fetchAccounts();
+        fetchTotalBalance();
     }, []);
 
     // -----------------------------------------------------
@@ -173,16 +191,15 @@ export default function AccountsPage() {
 
             await deleteAccount(accountToDelete.id);
 
-            // Le compte a été supprimé
             setDeleteSuccess(
                 `Le compte "${accountToDelete.name}" a été supprimé avec succès.`
             );
 
-            // Ferme la confirmation
             setAccountToDelete(null);
 
-            // Recharge la liste
+            // Recharge la liste et le total
             await fetchAccounts();
+            await fetchTotalBalance();
 
         } catch (error) {
 
@@ -199,7 +216,7 @@ export default function AccountsPage() {
     };
 
     // -----------------------------------------------------
-    // Regroupement des comptes
+    // Regroupement
     // -----------------------------------------------------
 
     const groupedAccounts = groupByType(accounts);
@@ -246,7 +263,7 @@ export default function AccountsPage() {
             )}
 
             {/* =================================================
-                ÉTAT : CHARGEMENT
+                CHARGEMENT
             ================================================= */}
 
             {loading && (
@@ -269,7 +286,7 @@ export default function AccountsPage() {
             )}
 
             {/* =================================================
-                ÉTAT : ERREUR
+                ERREUR
             ================================================= */}
 
             {!loading && error && (
@@ -280,7 +297,7 @@ export default function AccountsPage() {
             )}
 
             {/* =================================================
-                ÉTAT : AUCUN COMPTE
+                AUCUN COMPTE
             ================================================= */}
 
             {!loading &&
@@ -294,116 +311,127 @@ export default function AccountsPage() {
                 )}
 
             {/* =================================================
-                ÉTAT : COMPTES
+                LISTE DES COMPTES
             ================================================= */}
 
             {!loading &&
                 !error &&
                 accounts.length > 0 && (
 
-                    Object.keys(groupedAccounts).map(
-                        (type) => (
+                    <>
+                        {Object.keys(groupedAccounts).map(
+                            (type) => (
 
-                            <div
-                                className="card mb-4"
-                                key={type}
-                            >
+                                <div
+                                    className="card mb-4"
+                                    key={type}
+                                >
 
-                                <div className="card-body">
+                                    <div className="card-body">
 
-                                    {/* -----------------------------
-                                        Catégorie
-                                    ------------------------------ */}
+                                        <small className="text-uppercase text-muted">
+                                            {categoryLabel(type)}
+                                        </small>
 
-                                    <small className="text-uppercase text-muted">
-                                        {categoryLabel(type)}
-                                    </small>
+                                        {groupedAccounts[type].map(
+                                            (account) => (
 
-                                    {/* -----------------------------
-                                        Comptes
-                                    ------------------------------ */}
+                                                <div
+                                                    key={account.id}
+                                                    className="d-flex justify-content-between align-items-center border-top pt-3 mt-3"
+                                                >
 
-                                    {groupedAccounts[type].map(
-                                        (account) => (
+                                                    {/* Nom */}
 
-                                            <div
-                                                key={account.id}
-                                                className="d-flex justify-content-between align-items-center border-top pt-3 mt-3"
-                                            >
+                                                    <div className="d-flex align-items-center">
 
-                                                {/* ---------
-                                                    Nom
-                                                ---------- */}
+                                                        <img
+                                                            src={moneyIcon}
+                                                            alt=""
+                                                            className="me-3"
+                                                            style={{
+                                                                width: "32px",
+                                                                height: "32px",
+                                                            }}
+                                                        />
 
-                                                <div className="d-flex align-items-center">
+                                                        <div>
+                                                            <h5 className="mb-0">
+                                                                {account.name}
+                                                            </h5>
+                                                        </div>
 
-                                                    <img
-                                                        src={moneyIcon}
-                                                        alt=""
-                                                        className="me-3"
-                                                        style={{
-                                                            width: "32px",
-                                                            height: "32px",
-                                                        }}
-                                                    />
+                                                    </div>
 
-                                                    <div>
+                                                    {/* Solde + suppression */}
+
+                                                    <div className="d-flex align-items-center gap-3">
 
                                                         <h5 className="mb-0">
-                                                            {account.name}
+                                                            {formatBalance(
+                                                                account.balance
+                                                            )}
                                                         </h5>
+
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-danger btn-sm"
+                                                            onClick={() => {
+
+                                                                setDeleteError("");
+                                                                setDeleteSuccess("");
+
+                                                                setAccountToDelete(
+                                                                    account
+                                                                );
+                                                            }}
+                                                        >
+                                                            Supprimer
+                                                        </button>
 
                                                     </div>
 
                                                 </div>
 
-                                                {/* ---------
-                                                    Solde +
-                                                    suppression
-                                                ---------- */}
+                                            )
+                                        )}
 
-                                                <div className="d-flex align-items-center gap-3">
+                                    </div>
 
-                                                    <h5 className="mb-0">
-                                                        {formatBalance(
-                                                            account.balance
-                                                        )}
-                                                    </h5>
+                                </div>
 
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline-danger btn-sm"
-                                                        onClick={() => {
+                            )
+                        )}
 
-                                                            setDeleteError("");
-                                                            setDeleteSuccess("");
+                        {/* =================================================
+                            SOLDE TOTAL
+                        ================================================= */}
 
-                                                            setAccountToDelete(
-                                                                account
-                                                            );
-                                                        }}
-                                                    >
-                                                        Supprimer
-                                                    </button>
+                        {totalBalance !== null && (
+                            <div className="card mb-4">
 
-                                                </div>
+                                <div className="card-body d-flex justify-content-between align-items-center">
 
-                                            </div>
+                                    <h5 className="mb-0">
+                                        Solde total
+                                    </h5>
 
-                                        )
-                                    )}
+                                    <h4 className="mb-0 text-success">
+                                        {formatBalance(
+                                            totalBalance
+                                        )}
+                                    </h4>
 
                                 </div>
 
                             </div>
+                        )}
 
-                        )
-                    )
-
+                    </>
                 )}
 
             {/* =================================================
-                MODAL AJOUT DE COMPTE
+                MODAL AJOUT
             ================================================= */}
 
             <AddAccountModal
@@ -415,11 +443,12 @@ export default function AccountsPage() {
 
                 onAccountCreated={() => {
                     fetchAccounts();
+                    fetchTotalBalance();
                 }}
             />
 
             {/* =================================================
-                MODAL CONFIRMATION SUPPRESSION
+                MODAL SUPPRESSION
             ================================================= */}
 
             {accountToDelete && (
@@ -439,10 +468,6 @@ export default function AccountsPage() {
 
                         <div className="modal-content">
 
-                            {/* -----------------------------
-                                HEADER
-                            ------------------------------ */}
-
                             <div className="modal-header">
 
                                 <h5 className="modal-title">
@@ -460,10 +485,6 @@ export default function AccountsPage() {
                                 />
 
                             </div>
-
-                            {/* -----------------------------
-                                BODY
-                            ------------------------------ */}
 
                             <div className="modal-body">
 
@@ -487,10 +508,6 @@ export default function AccountsPage() {
                                 )}
 
                             </div>
-
-                            {/* -----------------------------
-                                FOOTER
-                            ------------------------------ */}
 
                             <div className="modal-footer">
 
