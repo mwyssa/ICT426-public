@@ -8,7 +8,7 @@ import cors from "cors";
 // Import des routes.
 import authRoutes from "./routes/auth_routes.js";
 import accountsRoutes from "./routes/account_routes.js";
-import transactionRoutes from "./routes/transaction_routes.js";
+import transactionsRoutes from "./routes/transaction_routes.js";
 
 // import accountsRoutes from "./routes/account_routes.js";
 
@@ -69,7 +69,7 @@ app.use("/api/auth", authRoutes);
 // Toutes les routes définies dans accountsRoutes seront accessibles
 // via le préfixe /api/accounts
 app.use("/api/accounts", accountsRoutes);
-app.use("/api/transactions", transactionRoutes);
+app.use("/api/transactions", transactionsRoutes);
 // ---------------------------------------------------------
 // Route inexistante
 // ---------------------------------------------------------
