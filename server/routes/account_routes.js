@@ -4,6 +4,7 @@
  */
 
 import express from "express";
+// Middleware chargé de vérifier le token JWT.
 import { authenticateToken } from "../middleware/auth_middleware.js";
 import { getMyAccounts, getMyAccountById } from "../controllers/account_controller.js";
 
@@ -13,14 +14,8 @@ import {
     deleteAccount
 } from "../controllers/account_controller.js";
 
-// Middleware chargé de vérifier le token JWT.
-import {
-    authenticateToken
-} from "../middleware/auth_middleware.js";
-
 // Fonctions permettant de récupérer les comptes et les soldes.
 import {
-    getAccountByUserId,
     getTotalBalanceByUserId,
     getAccountBalanceByUserIdAndAccountId
 } from "../models/account_model.js";
@@ -55,59 +50,22 @@ router.delete(
     authenticateToken,
     deleteAccount
 );
-
-// ---------------------------------------------------------
-// GET /api/accounts/:id
-// ---------------------------------------------------------
-//
-// Récupère les comptes associés à un utilisateur.
-// :id correspond à l'id de l'utilisateur.
-//
-router.get("/:id", async (req, res) => {
-
-    try {
-        const id = parseInt(req.params.id);
-
-        const account = await getAccountByUserId(id);
-
-        if (!account) {
-            return res.status(404).json({
-                error: "NOT_FOUND",
-                message: "Aucun compte trouvé."
-            });
-        }
-
-        return res.json(account);
-
-    } catch (error) {
-
-        return res.status(500).json({
-            error: "INTERNAL_SERVER_ERROR",
-            message: "Erreur lors de la récupération des comptes."
-        });
-    }
-});
+// Récupérer tous les comptes de l'utilisateur connecté
+router.get("/", authenticateToken, getMyAccounts);
 
 // ---------------------------------------------------------
 // GET /api/accounts/:id/total-balance
 // ---------------------------------------------------------
 //
-// Récupère le solde total de tous les comptes d'un utilisateur.
+// Récupère le solde total de tous les comptes de l'utilisateur connecté.
 //
-router.get("/:id/total-balance", async (req, res) => {
+router.get("/total-balance", authenticateToken, async (req, res) => {
 
     try {
-        const id = parseInt(req.params.id);
+        const userId = req.user.id;
 
         const totalBalance =
-            await getTotalBalanceByUserId(id);
-
-        if (!totalBalance) {
-            return res.status(404).json({
-                error: "NOT_FOUND",
-                message: "Aucun compte trouvé pour cet utilisateur."
-            });
-        }
+            await getTotalBalanceByUserId(userId);
 
         return res.json({
             total_balance: totalBalance
@@ -123,15 +81,23 @@ router.get("/:id/total-balance", async (req, res) => {
 });
 
 // ---------------------------------------------------------
+// GET /api/accounts/:id
+// ---------------------------------------------------------
+//
+// Récupérer un compte précis
+router.get("/:id", authenticateToken, getMyAccountById);
+
+
+// ---------------------------------------------------------
 // GET /api/accounts/:userId/:accountId
 // ---------------------------------------------------------
 //
 // Récupère le solde d'un compte spécifique.
 //
-router.get("/:userId/:accountId", async (req, res) => {
+router.get("/:accountId/balance",authenticateToken, async (req, res) => {
 
     try {
-        const userId = parseInt(req.params.userId);
+        const userId = req.user.id;
         const accountId = parseInt(req.params.accountId);
 
         const accountInfo =
@@ -141,13 +107,6 @@ router.get("/:userId/:accountId", async (req, res) => {
             );
 
         if (!accountInfo) {
-            return res.status(404).json({
-                error: "NOT_FOUND",
-                message: "Compte non trouvé."
-            });
-        }
-
-        if (accountInfo.length === 0) {
             return res.status(404).json({
                 error: "NOT_FOUND",
                 message: "Compte non trouvé."
@@ -170,10 +129,5 @@ router.get("/:userId/:accountId", async (req, res) => {
 // La route sera protégé par le middleware authenticateToken pour vérifier qu'un seul utilisateur authentifié y accède.
 
 
-// Récupérer tous les comptes de l'utilisateur connecté
-router.get("/", authenticateToken, getMyAccounts);
-
-// Récupérer un compte précis
-router.get("/:id", authenticateToken, getMyAccountById);
 
 export default router;

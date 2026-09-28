@@ -2,14 +2,26 @@
  * CONTROLLER : Gestion des Comptes (Accounts)
  * Rôle : Reçoit les requêtes HTTP, extrait l'utilisateur et appelle le modèle.
  */
+// Validator permettant de vérifier les données reçues.
+import {
+    validateCreateAccount
+} from "../validators/account_validator.js";
 
-import { getAccountByUserId, findAccountByIdAndUser} from "../models/account_model.js";
+// Fonctions permettant d'accéder à MySQL.
+import {
+    insertAccount,
+    findAccountById,
+    deleteAccountByIdAndUserId,
+    getAccountByUserId,
+    getAccountByIdAndUser
+} from "../models/account_model.js";
+
 
 /* Retourne les comptes de l'utilisateur connecté.*/
 export async function getMyAccounts(req, res) {
     try {
         const userId = req.user.id;
-        const accounts = awaitgetAccountByUserId(userId);
+        const accounts = await getAccountByUserId(userId);
         res.json(accounts);
     } catch (error) {
         res.status(500).json({message: "Une erreur interne est survenue"});
@@ -32,20 +44,6 @@ export async function getMyAccountById(req, res) {
     }
 }
 
-
-
-
-// Validator permettant de vérifier les données reçues.
-    import {
-        validateCreateAccount
-    } from "../validators/account_validator.js";
-
-// Fonctions permettant d'accéder à MySQL.
-    import {
-        insertAccount,
-        findAccountById,
-        deleteAccountByIdAndUserId
-    } from "../models/account_model.js";
 
 
     /**

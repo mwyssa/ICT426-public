@@ -54,12 +54,11 @@ export async function findAccountById(id) {
 }
 
 /**
- * Récupère les comptes d'un utilisateur.
+ * Récupère tous les comptes d'un utilisateur.
  */
 export async function getAccountByUserId(userId) {
     const [rows] = await pool.execute(
         `
-        SELECT id, name,balance,type
         SELECT
             id,
             name,
@@ -70,16 +69,14 @@ export async function getAccountByUserId(userId) {
         `,
         [userId]
     );
-
-    return rows;
-    return rows || null;
+    return rows ;
 }
 
 /**
  * Récupère un compte spécifique uniquement s'il appartient à l'utilisateur connecté.
  Pour la route : GET /api/accounts/:id. */
 
-export async function findAccountByIdAndUser(accountId,userId) {
+export async function getAccountByIdAndUser(accountId,userId) {
 
     const [rows] = await pool.execute(
         `
@@ -90,38 +87,23 @@ export async function findAccountByIdAndUser(accountId,userId) {
         [accountId, userId]
     );
 
-    // Si on a trouvé au moins une ligne dans la base de données
-    if (rows.length > 0) {
-        return rows[0]; // On renvoie le compte (le premier élément du tableau)
-    } else {
-        return null;    // Sinon, on renvoie null (rien trouvé)
-    }
+    return rows[0]|| null;
 }
 
-// calcul du solde total de tous les comptes d'un utilisateur
+// Calcul du solde total de tous les comptes d'un utilisateur
 export async function getTotalBalanceByUserId(userId) {
     const [rows] = await pool.execute(
         `
-        SELECT id, name,balance,type
-        FROM Accounts
-        WHERE id = ? AND user_id = ?
         SELECT SUM(balance) as total_balance
         FROM accounts
         WHERE user_id = ?
         `,
-        [accountId, userId]
         [userId]
     );
     return rows[0]?.total_balance || 0;
 }
 
-    // Si on a trouvé au moins une ligne dans la base de données
-    if (rows.length > 0) {
-        return rows[0]; // On renvoie le compte (le premier élément du tableau)
-    } else {
-        return null;    // Sinon, on renvoie null (rien trouvé)
-    }
-// récupération du solde d'un compte spécifique par l'id de l'utilisateur et l'id du compte
+// Récupération du solde d'un compte spécifique par l'id de l'utilisateur et l'id du compte
 export async function getAccountBalanceByUserIdAndAccountId(userId, accountId) {
     const [rows] = await pool.execute(
         `
