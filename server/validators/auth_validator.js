@@ -107,7 +107,7 @@ export function validateRegister(data = {}) {   // on déclare et exporte la fon
     //1. on vérifie les champs obligtoires et 2. on valide le format de l'email
     // en gros on s'assure que le mail est pas vide et on vérifie que son format respecte la structure standard d'un email.
     if (!email) {   // si la variable email est vide
-        errrors.email = "L'email est obligatoire.";  //on ajoute une propriété  email à notre objet errors avec un message.
+        errors.email = "L'email est obligatoire.";  //on ajoute une propriété  email à notre objet errors avec un message.
     } else {    // si y'a qqc dans email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;    // on définit une expression régulière (Regex) qui est un modèle de recherche textuelle qui permets de valider la structure d'une adresse email.
         // ^ $ indiquent le début et la fin de la chaîne.
