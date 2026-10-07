@@ -164,7 +164,7 @@ export async function login(req, res, next) {
  * POST /api/auth/register
  */
 // en dessous c'est l'en-tête de la fonction
-export async function register(req, res, next) {    //on exporte une fonction asynchrone qui prends les 3 objets d'Express: req (la requête reçue du client), res (la réponse qu'on va renvoyer), next pour passer leserreurs au gestionnaire.
+export async function register(req, res, next) {    //on exporte une fonction asynchrone qui prends les 3 objets d'Express: req (la requête reçue du client), res (la réponse qu'on va renvoyer), next pour passer les erreurs au gestionnaire.
 
     try {   // on utilise try pour attraper et gérer les erreurs imprévues qui pourraient survenir pdt l'exécution du code
 
@@ -182,7 +182,7 @@ export async function register(req, res, next) {    //on exporte une fonction as
             });
         }
 
-        const { email, password } = validation;
+        const { name, email, password } = validation;
 
 
         // ---------------------------------------------------------
@@ -210,7 +210,7 @@ export async function register(req, res, next) {    //on exporte une fonction as
         // ---------------------------------------------------------
         // 4. Enregistrement en base de données (pour la persistance)
         // ---------------------------------------------------------
-        const newUserId = await createUser(email, hashedPassword);  // on appelle la fonction du modèle pour insérer le new user dans la table MySQL (y'aura le mot de passe hashl dedans).
+        const newUserId = await createUser(name, email, hashedPassword);  // on appelle la fonction du modèle pour insérer le new user dans la table MySQL (y'aura le mot de passe hashl dedans).
         // on récupère ensuite l'ID unique qui vient d0être généré.
 
 
@@ -221,6 +221,7 @@ export async function register(req, res, next) {    //on exporte une fonction as
             message: "Compte créé avec succès.",
             user: {
                 id: newUserId,
+                name: name,
                 mail: email
             }
         });

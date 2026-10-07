@@ -58,7 +58,7 @@ export function validateLogin(data = {}) {
         email,
         password
     };
-};
+}
 
 /**
  * Vérifie les données envoyées lors d'une tentative d'inscription.
@@ -71,6 +71,13 @@ export function validateRegister(data = {}) {   // on déclare et exporte la fon
     // {} on donne une valeur par défaut pour sécuriser le passage de données erronée.
     const errors = {};  // on initialise un objet vide pour stocker les erreurs trouvées pendant la validation.
 
+    // Vérifie que name est bien une chaîne de caractères.
+    // trim() enlève les espaces inutiles au début et à la fin.
+    const name =
+        typeof data.name === "string"
+            ? data.name.trim()
+            : "";
+
     // Nettoyage et vérification de l'email
     const email = typeof data.email === "string"? data.email.trim().toLowerCase(): "";
     // typeof data.email === "string" => On vérifie que ce qui a été envoyé est un un string pour éviter les bugs si l'user envoie un nombre ou autre erreur.
@@ -82,6 +89,20 @@ export function validateRegister(data = {}) {   // on déclare et exporte la fon
     // on s'assure de la même manière que le password reçu est du texte.
     // on ne fait pas de trim ni lowercase sur les mots de passes car tout fait partie du mot de passe.
     // Si le test échoue, on renvoie "".
+
+    // ---------------------------------------------------------
+    // Validation du nom
+    // ---------------------------------------------------------
+    if (!name) {
+        errors.name = "Le nom est obligatoire.";
+    }
+
+    // La colonne name de MySQL est VARCHAR(45).
+    // On évite donc d'envoyer une valeur trop longue.
+    else if (name.length > 45) {
+        errors.name =
+            "Le nom ne peut pas dépasser 45 caractères.";
+    }
 
     //1. on vérifie les champs obligtoires et 2. on valide le format de l'email
     // en gros on s'assure que le mail est pas vide et on vérifie que son format respecte la structure standard d'un email.
@@ -120,6 +141,7 @@ export function validateRegister(data = {}) {   // on déclare et exporte la fon
         // Object.keys(errors) récupère toutes les clés (les noms de champs en erreur du style email ou password) de l'objet errors et les place dans un tableau
         // .length === 0 vérifie que le tableau est vide donc valid vaudra true si y'a aucune erreur
         errors, //on renvoie le message d'erreur
+        name,
         email, //on renvoie l'email nettoyé (sans espaces et en minuscules)
         password // (on renvoie le password comme tel prête à être hashé)
     };
