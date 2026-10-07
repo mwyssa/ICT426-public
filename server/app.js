@@ -9,6 +9,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth_routes.js";
 import accountRoutes from "./routes/account_routes.js";
 import transactionsRoutes from "./routes/transaction_routes.js";
+import familyRoutes from "./routes/family_routes.js";
 
 // import accountsRoutes from "./routes/account_routes.js";
 
@@ -70,6 +71,7 @@ app.use("/api/auth", authRoutes);
 // via le préfixe /api/accounts
 app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionsRoutes);
+app.use("/api/family", familyRoutes);
 // ---------------------------------------------------------
 // Route inexistante
 // ---------------------------------------------------------
