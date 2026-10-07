@@ -17,6 +17,29 @@ const options = {
         {
             "schemas":
             {
+                "login":
+                {
+                    "type": "object",
+                    "properties":
+                    {
+                        "email": { "type": "string", "example" : "user@example.com", "description" : "Adresse email de l'utilisateur" },
+                        "password": { "type": "string", "example" : "password123", "description" : "Mot de passe de l'utilisateur" }
+                    },
+                    required: ['email', 'password']
+                },
+
+                "postAccount":
+                {
+                    "type": "object",
+                    "properties":
+                    {
+                        "name": { "type": "string", "example" :"Raiffeisen Camille", "description" : "nom du compte"  },
+                        "type" : { "type": "string", "example" :"Compte Courant", "description" : "type du compte"  },
+                        "balance" : { "type": "number", "example" : 1000.50, "description" : "solde du compte"  },
+                    },
+                    required: ['name', 'type', 'balance']
+                },
+
                 "getFamilyMembers":
                 {
                     "type": "object",
