@@ -34,6 +34,8 @@ const router = express.Router();
  * @openapi
  * /api/accounts:
  *   post:
+ *     tags:
+ *       - POST
  *     summary: Créer un compte bancaire pour l'utilisateur connecté
  *     description: Crée un nouveau compte bancaire pour l'utilisateur connecté.
  *     security:
@@ -71,6 +73,8 @@ router.post(
  * @openapi
  * /api/accounts/{id}:
  *   delete:
+ *    tags:
+ *     - DELETE
  *    summary: Supprimer un compte bancaire
  *    description: Supprime un compte bancaire spécifique de l'utilisateur connecté.
  *    security:
@@ -97,6 +101,22 @@ router.delete(
     deleteAccount
 );
 // Récupérer tous les comptes de l'utilisateur connecté
+/**
+ * @openapi
+ * /api/accounts:
+ *   get:
+ *     tags:
+ *       - GET
+ *     summary: Récupérer tous les comptes de l'utilisateur connecté
+ *     description: Récupère tous les comptes de l'utilisateur connecté.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Comptes récupérés avec succès
+ *       500:
+ *         description: Erreur interne du serveur lors de la récupération des comptes
+ */
 router.get("/", authenticateToken, getMyAccounts);
 
 // ---------------------------------------------------------
@@ -109,6 +129,8 @@ router.get("/", authenticateToken, getMyAccounts);
  * @openapi
  * /api/accounts/total-balance:
  *   get:
+ *     tags:
+ *        - GET
  *     summary: Récupérer le solde total de tous les comptes de l'utilisateur connecté
  *     description: Récupère le solde total de tous les comptes de l'utilisateur connecté.
  *     security:
@@ -145,6 +167,30 @@ router.get("/total-balance", authenticateToken, async (req, res) => {
 // ---------------------------------------------------------
 //
 // Récupérer un compte précis
+/**
+ * @openapi
+ * /api/accounts/{id}:
+ *   get:
+ *    tags:
+ *      - GET
+ *    summary: Récupérer un compte précis de l'utilisateur connecté
+ *    description: Récupère un compte précis de l'utilisateur connecté.
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        schema:
+ *          type: integer
+ *    responses:
+ *      200:
+ *        description: Compte récupéré avec succès
+ *      404:
+ *        description: Compte non trouvé
+ *      500:
+ *        description: Erreur interne du serveur lors de la récupération du compte
+ */
 router.get("/:id", authenticateToken, getMyAccountById);
 
 
@@ -154,6 +200,31 @@ router.get("/:id", authenticateToken, getMyAccountById);
 //
 // Récupère le solde d'un compte spécifique.
 //
+
+/**
+ * @openapi
+ * /api/accounts/{accountId}/balance:
+ *   get:
+ *    tags:
+ *     - GET
+ *    summary: Récupérer le solde d'un compte spécifique de l'utilisateur connecté
+ *    description: Récupère le solde d'un compte spécifique de l'utilisateur connecté.
+ *    security:
+ *     - bearerAuth: []
+ *    parameters:
+ *     - in: path
+ *       name: accountId
+ *       required: true
+ *       schema:
+ *         type: integer
+ *    responses:
+ *      200:
+ *        description: Solde du compte récupéré avec succès
+ *      404:
+ *        description: Compte non trouvé
+ *      500:
+ *        description: Erreur interne du serveur lors de la récupération du solde du compte
+ */
 router.get("/:accountId/balance",authenticateToken, async (req, res) => {
 
     try {

@@ -28,6 +28,18 @@ const options = {
                     required: ['email', 'password']
                 },
 
+                "register":
+                {
+                    "type": "object",
+                    "properties":
+                    {
+                        "name": { "type": "string", "example" : "John Doe", "description" : "Nom complet de l'utilisateur" },
+                        "email": { "type": "string", "example" : "user@example.com", "description" : "Adresse email de l'utilisateur" },
+                        "password": { "type": "string", "example" : "password123", "description" : "Mot de passe de l'utilisateur" }
+                    },
+                    required: ['name', 'email', 'password']
+                },
+
                 "postAccount":
                 {
                     "type": "object",

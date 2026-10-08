@@ -8,6 +8,8 @@ const router = express.Router();
  * @openapi
  * /api/family/{id}:
  *   get:
+ *     tags:
+ *       - GET
  *     summary: Récupérer tous les membres de la famille
  *     description: Récupère tous les membres d'une famille spécifique.
  *     parameters:
@@ -59,6 +61,8 @@ router.get("/:id", async (req, res) =>{
  * @openapi
  * /api/family/create/{userId}:
  *   post:
+ *     tags:
+ *       - POST
  *     summary: Créer une famille
  *     description: Crée une nouvelle famille et attribue le rôle d'administrateur à l'utilisateur spécifié.
  *     parameters:
@@ -124,6 +128,8 @@ router.post("/create/:userId", async (req,res) =>{
  * @openapi
  * /api/family/update/{familyId}/{userId}:
  *   put:
+ *     tags:
+ *       - PUT
  *     summary: Modifier le nom de la famille
  *     description: Modifie le nom de la famille pour un utilisateur spécifique.
  *     parameters:
