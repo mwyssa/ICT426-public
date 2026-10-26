@@ -108,8 +108,6 @@ Les fonctionnalités sont classées selon trois états :
 - **mysql2** : communication avec la base de données MySQL.
 - **jsonwebtoken** : génération et vérification des tokens JWT.
 - **bcrypt** : hachage et vérification des mots de passe.
-- **CORS** : gestion des requêtes entre frontend et backend.
-- **dotenv** : chargement des variables d’environnement.
 
 ### Base de données
 
