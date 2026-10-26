@@ -252,50 +252,12 @@ http://localhost:5173
 Dans chaque terminal, utiliser `Ctrl + C` pour arrêter le serveur correspondant.
 
 
-## 8. Routes API
+## 8. Documentation de l'API
 
-Le backend expose une API REST permettant de gérer l’authentification, les comptes bancaires, les transactions et les familles.
+L'application dispose d'une API REST développée avec Node.js et Express.
 
-Les endpoints suivants correspondent aux routes présentes dans la documentation de l’API.
+L'ensemble des routes API sont documentées avec **Swagger**, directement accessible depuis le backend([Documentation swagger](https://github.com/CamBach/ICT426-GestionBudget/tree/main/server/routes)). Cette documentation sert à consulter les endpoints disponibles, leurs paramètres et les réponses attendues.
 
-### GET — Récupération des données
-
-| Méthode | Route | Utilité |
-|---|---|---|
-| `GET` | `/api/transactions` | Récupérer toutes les transactions de l'utilisateur connecté. |
-| `GET` | `/api/transactions/{id}` | Récupérer une transaction spécifique de l'utilisateur connecté. |
-| `GET` | `/api/family/{id}` | Récupérer tous les membres de la famille. |
-| `GET` | `/api/accounts` | Récupérer tous les comptes de l'utilisateur connecté. |
-| `GET` | `/api/accounts/{id}` | Récupérer un compte précis de l'utilisateur connecté. |
-| `GET` | `/api/accounts/total-balance` | Récupérer le solde total de tous les comptes de l'utilisateur connecté. |
-| `GET` | `/api/accounts/{accountId}/balance` | Récupérer le solde d'un compte spécifique de l'utilisateur connecté. |
-
-### POST — Création et authentification
-
-| Méthode | Route | Utilité |
-|---|---|---|
-| `POST` | `/api/family/create/{userId}` | Créer une famille. |
-| `POST` | `/api/auth/login` | Connecter un utilisateur. |
-| `POST` | `/api/auth/register` | Inscrire un nouvel utilisateur. |
-| `POST` | `/api/accounts` | Créer un compte bancaire pour l'utilisateur connecté. |
-
-### PUT — Modification des données
-
-| Méthode | Route | Utilité |
-|---|---|---|
-| `PUT` | `/api/family/update/{familyId}/{userId}` | Modifier le nom de la famille. |
-
-### DELETE — Suppression des données
-
-| Méthode | Route | Utilité |
-|---|---|---|
-| `DELETE` | `/api/accounts/{id}` | Supprimer un compte bancaire. |
-
-### Authentification des requêtes
-
-L’application utilise des tokens JWT pour l’authentification.
-
-Lorsqu’un utilisateur se connecte avec des identifiants valides, le backend lui renvoie un token JWT.
 
 ## 9. Points à retenir
 
