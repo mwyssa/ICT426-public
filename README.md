@@ -256,7 +256,7 @@ Dans chaque terminal, utiliser `Ctrl + C` pour arrêter le serveur correspondant
 
 L'application dispose d'une API REST développée avec Node.js et Express.
 
-L'ensemble des routes API sont documentées avec **Swagger**, directement accessible depuis le backend ([Documentation Swagger](https://github.com/CamBach/ICT426-GestionBudget/tree/main/server/routes)). 
+L'ensemble des routes API sont documentées avec **Swagger**, directement accessible depuis le backend quand le projet est lancé ([Documentation Swagger](http://localhost:3000/api-docs/)). 
 
 Cette documentation sert à consulter les endpoints disponibles, leurs paramètres et les réponses attendues.
 
