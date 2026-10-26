@@ -7,98 +7,71 @@ import type { Account } from "../types/account";
 const API_URL = "http://localhost:3000/api/accounts";
 
 // ----------------------------------------------------------------------------
-// Récupère l'ID de l'utilisateur connecté
+// Récupère le token de l'utilisateur connecté
 // ----------------------------------------------------------------------------
 
-function getUserId(): number {
-    const stored = localStorage.getItem("user");
+function getToken(): string {
+    const token = localStorage.getItem("token");
 
-    if (!stored) {
-        throw new Error("Utilisateur non connecté.");
+    if (!token) {
+        throw new Error("Vous devez être connecté.");
     }
 
-    try {
-        const user = JSON.parse(stored);
-
-        if (!user.id) {
-            throw new Error("Identifiant utilisateur introuvable.");
-        }
-
-        return Number(user.id);
-
-    } catch {
-        throw new Error(
-            "Impossible de récupérer les informations de l'utilisateur."
-        );
-    }
+    return token;
 }
 
 // ----------------------------------------------------------------------------
 // Récupère la liste des comptes de l'utilisateur connecté
+// GET /api/accounts
 // ----------------------------------------------------------------------------
 
 export async function getAccounts(): Promise<Account[]> {
-    const userId = getUserId();
+    const token = getToken();
 
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(
-        `${API_URL}/${userId}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token
-                    ? {
-                        Authorization: `Bearer ${token}`,
-                    }
-                    : {}),
-            },
-        }
-    );
+    const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
         throw new Error(
-            data.message ||
-            "Impossible de récupérer les comptes."
+            data.message || "Impossible de récupérer les comptes."
         );
     }
 
-    return data;
+    if (!Array.isArray(data)) {
+        throw new Error(
+            "Le serveur n'a pas renvoyé une liste de comptes valide."
+        );
+    }
+
+    return data as Account[];
 }
 
 // ----------------------------------------------------------------------------
-// Récupère le solde TOTAL de tous les comptes de l'utilisateur connecté
+// Récupère le solde total des comptes de l'utilisateur connecté
+// GET /api/accounts/total-balance
 // ----------------------------------------------------------------------------
 
 export async function getTotalBalance(): Promise<number> {
-    const userId = getUserId();
+    const token = getToken();
 
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(
-        `${API_URL}/${userId}/total-balance`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token
-                    ? {
-                        Authorization: `Bearer ${token}`,
-                    }
-                    : {}),
-            },
-        }
-    );
+    const response = await fetch(`${API_URL}/total-balance`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
         throw new Error(
-            data.message ||
-            "Impossible de récupérer le solde total."
+            data.message || "Impossible de récupérer le solde total."
         );
     }
 
@@ -107,6 +80,7 @@ export async function getTotalBalance(): Promise<number> {
 
 // ----------------------------------------------------------------------------
 // Crée un compte bancaire
+// POST /api/accounts
 // ----------------------------------------------------------------------------
 
 export type CreateAccountData = {
@@ -118,31 +92,22 @@ export type CreateAccountData = {
 export async function createAccount(
     account: CreateAccountData
 ): Promise<Account> {
+    const token = getToken();
 
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        throw new Error("Vous devez être connecté.");
-    }
-
-    const response = await fetch(
-        API_URL,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(account),
-        }
-    );
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(account),
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
         throw new Error(
-            data.message ||
-            "Impossible d'ajouter le compte."
+            data.message || "Impossible d'ajouter le compte."
         );
     }
 
@@ -151,34 +116,26 @@ export async function createAccount(
 
 // ----------------------------------------------------------------------------
 // Supprime un compte bancaire
+// DELETE /api/accounts/:id
 // ----------------------------------------------------------------------------
 
 export async function deleteAccount(
     accountId: number
 ): Promise<void> {
+    const token = getToken();
 
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        throw new Error("Vous devez être connecté.");
-    }
-
-    const response = await fetch(
-        `${API_URL}/${accountId}`,
-        {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
-    );
+    const response = await fetch(`${API_URL}/${accountId}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
         throw new Error(
-            data.message ||
-            "Impossible de supprimer le compte."
+            data.message || "Impossible de supprimer le compte."
         );
     }
 }
