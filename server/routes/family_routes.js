@@ -4,6 +4,34 @@ import { getFamilyMember, createFamily, updateFamilyName } from "../models/famil
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * /api/family/{id}:
+ *   get:
+ *     tags:
+ *       - GET
+ *     summary: Récupérer tous les membres de la famille
+ *     description: Récupère tous les membres d'une famille spécifique.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Liste des membres de la famille
+ *         content:
+ *             application/json:
+ *              schema:
+ *                  type: array
+ *                  items:
+ *                    $ref: "#/components/schemas/getFamilyMembers"
+ *       404:
+ *         description: Aucun membre de la famille trouvé
+ *       500:
+ *         description: Erreur interne du serveur lors de la récupération des membres de la famille
+ */
 // Récupérer tous les membres de la famille (family id)
 router.get("/:id", async (req, res) =>{
     try {
@@ -28,6 +56,36 @@ router.get("/:id", async (req, res) =>{
             });
         }
 });
+
+/**
+ * @openapi
+ * /api/family/create/{userId}:
+ *   post:
+ *     tags:
+ *       - POST
+ *     summary: Créer une famille
+ *     description: Crée une nouvelle famille et attribue le rôle d'administrateur à l'utilisateur spécifié.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Famille créée avec succès
+ *         content:
+ *             application/json:
+ *              schema:
+ *                  items:
+ *                    $ref: "#/components/schemas/putFamilyName"
+ *       400:
+ *         description: Requête invalide (nom de famille manquant ou identifiant invalide)
+ *       403:
+ *         description: Accès refusé
+ *       500:
+ *         description: Erreur interne du serveur lors de la récupération des membres de la famille
+ */
 
 // Créer une famille + rendre le user admin (user id)
 router.post("/create/:userId", async (req,res) =>{
@@ -64,6 +122,42 @@ router.post("/create/:userId", async (req,res) =>{
         }
     }
 });
+
+
+/**
+ * @openapi
+ * /api/family/update/{familyId}/{userId}:
+ *   put:
+ *     tags:
+ *       - PUT
+ *     summary: Modifier le nom de la famille
+ *     description: Modifie le nom de la famille pour un utilisateur spécifique.
+ *     parameters:
+ *       - in: path
+ *         name: familyId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Nom de la famille mis à jour avec succès
+ *         content:
+ *             application/json:
+ *              schema:
+ *                  items:
+ *                    $ref: "#/components/schemas/putFamilyName"
+ *       400:
+ *         description: Requête invalide (nom de famille manquant ou identifiant invalide)
+ *       403:
+ *         description: Accès refusé
+ *       500:
+ *         description: Erreur interne du serveur lors de la récupération des membres de la famille
+ */
 
 // Modifier le nom de la famille (family id, user id)
 router.put("/update/:familyId/:userId", async (req, res) => {

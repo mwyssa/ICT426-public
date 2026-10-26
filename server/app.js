@@ -1,5 +1,6 @@
 import express from "express";
-
+import swaggerUi from 'swagger-ui-express';
+import {openApiSpecification} from './swagger.js';
 // CORS permet au frontend Vite situé sur un autre port
 // d'envoyer des requêtes vers notre API.
 import cors from "cors";
@@ -55,6 +56,8 @@ app.use(express.json());
 // Routes
 // ---------------------------------------------------------
 
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpecification)); // route pour la documentation Swagger
 // Toutes les routes déclarées dans auth_routes.js
 // commenceront par /api/auth.
 //
