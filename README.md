@@ -191,10 +191,11 @@ Elle contient :
 
 ### Prérequis
 
-- Node.js et npm
-- MySQL
+- Node.js et npm.
+- Un serveur MySQL.
+- MySQL Workbench ou un autre outil permettant d’exécuter les scripts SQL.
 
-Toutes les commandes doivent être exécutées depuis le dossier racine du projet (contenant `package.json`).
+Toutes les commandes doivent être exécutées depuis le dossier racine.
 
 ### 7.1 Installer les dépendances
 
@@ -202,25 +203,23 @@ Toutes les commandes doivent être exécutées depuis le dossier racine du proje
 npm install
 ```
 
-Si nécessaire, installer les dépendances du backend :
+Cette commande installe les dépendances du frontend et du backend.
 
-```bash
-npm install express mysql2 bcrypt jsonwebtoken dotenv cors
-```
+### 7.2 Créer la base de données locale
 
-Si vous avez un script à valider :
+Les scripts SQL se trouvent dans le dossier `database`, à la racine du projet.
 
-```bash
-npm approve-scripts bcrypt@6.0.0
-```
+1. Démarrer le serveur MySQL.
+2. Ouvrir et exécuter le script `database/Budget_Schema.sql` dans MySQL Workbench. Il crée la base `BudgetManagement` ainsi que ses tables.
+3. Exécuter ensuite le script `database/data.sql` pour insérer les données fictives de test.
 
-### 7.2 Configurer la base de données
+### 7.3 Configurer le fichier .env
 
-- Démarrer MySQL.
-- Configurer la base de données locale.
-- Renseigner les paramètres de connexion dans le fichier `.env`.
+À la racine de l’application, copier le fichier `.env.example` et renommer la copie en `.env`.
 
-### 7.3 Démarrer le backend
+Renseigner les paramètres correspondant à votre installation.
+
+### 7.4 Démarrer le backend
 
 Dans un premier terminal :
 
@@ -228,14 +227,17 @@ Dans un premier terminal :
 npm run dev:server
 ```
 
-Si tout fonctionne :
+Si la connexion à MySQL fonctionne, les messages suivants s’affichent :
 
 ```text
 Connexion MySQL réussie.
 API disponible sur http://localhost:3000
 ```
 
-### 7.4 Démarrer le frontend
+La documentation Swagger est alors accessible à l’adresse :
+[http://localhost:3000/api-docs/](http://localhost:3000/api-docs/).
+
+### 7.5 Démarrer le frontend
 
 Dans un second terminal :
 
@@ -243,14 +245,14 @@ Dans un second terminal :
 npm run dev
 ```
 
-Ouvrir ensuite l'application dans le navigateur :
+Ouvrir ensuite l’application dans le navigateur à l’adresse indiquée par Vite, généralement :
+[http://localhost:5173](http://localhost:5173).
 
-http://localhost:5173
+Garder les deux terminaux ouverts pendant l’utilisation de l’application.
 
-### 7.5 Arrêter les serveurs
+### 7.6 Arrêter les serveurs
 
 Dans chaque terminal, utiliser `Ctrl + C` pour arrêter le serveur correspondant.
-
 
 ## 8. Documentation de l'API
 
