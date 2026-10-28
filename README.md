@@ -276,11 +276,11 @@ Cette documentation sert à consulter les endpoints disponibles, leurs paramètr
 
 Projet réalisé dans le cadre du cours **ICT426** par :
 
-- Nadia Abdi Mohamoud
-- Marc Schilter
-- Adriano Alves Morais
-- Noor Kammoun
-- Aleksander Johnson
-- David Vilela
-- Camille Anaïs Bachmann
-- Julie Rossi
+- Nadia Abdi Mohamoud : dev-nadia
+- Marc Schilter : Malanoc
+- Adriano Alves Morais : kabutoadri
+- Noor Kammoun : nokam-bat
+- Aleksander Johnson : aleks0mj 
+- David Vilela : timmy3141 
+- Camille Anaïs Bachmann : CamBach 
+- Julie Rossi : jursi26 
